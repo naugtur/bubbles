@@ -5,13 +5,32 @@ set -euo pipefail
 readonly DIR="${HOME}/.speechbubble"
 readonly FILE="${DIR}/rec"
 readonly MAX_DURATION=300
-readonly AUDIO_INPUT='hw:0,0' # Use `arecord -l` to list available devices
 readonly MODELS_DIR="${DIR}/models"
 readonly MODEL_NAME="base.en"
 readonly CONTAINER_NAME="speechbubble"
+readonly AUDIO_DEVICE="default"
+
+if [[ "$(uname)" == "Darwin" ]]; then
+    echo "MacOS detected. Setting up PulseAudio..."
+    # Check if pulseaudio is running
+    if ! command -v pulseaudio >/dev/null; then
+        echo "Please install pulseaudio first:"
+        echo "  brew install pulseaudio"
+        exit 1
+    fi
+    if ! pulseaudio --check; then
+        echo "Starting PulseAudio daemon..."
+        pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon
+    fi
+    readonly DOCKER_AUDIO_FLAGS="-e PULSE_SERVER=docker.for.mac.localhost -v ~/.config/pulse:/root/.config/pulse"
+else
+    # On Linux, PulseAudio is usually already running
+    readonly DOCKER_AUDIO_FLAGS="-v /run/user/$(id -u)/pulse:/run/user/1000/pulse -e PULSE_SERVER=unix:/run/user/1000/pulse/native"
+fi
 
 mkdir -p "$DIR"
 
+# Update the ensure_image function with pulseaudio support
 ensure_image() {
   if (! docker image inspect speechbubble:latest >/dev/null 2>&1); then
     echo "Building custom Docker image..."
@@ -19,33 +38,35 @@ ensure_image() {
 FROM ghcr.io/ggml-org/whisper.cpp:main
 
 RUN apt-get update && apt-get install -y \
-    alsa-utils \
-    sox \
+    pulseaudio \
+    pulseaudio-utils \
     && rm -rf /var/lib/apt/lists/*
 DOCKERFILE
   fi
 }
 
+# Update start_recording to use pulseaudio instead of parec
 start_recording() {
   echo "Started recording..."
 
   input_name=$(basename "$FILE.wav")
 
-  docker run --rm -d \
+  docker run -d --rm \
     --name "$CONTAINER_NAME" \
-    --device=/dev/snd \
+    $DOCKER_AUDIO_FLAGS \
     --network none \
-    -v "$(dirname "$FILE"):/data" \
+    -v "$DIR:/data" \
     speechbubble:latest \
-    "arecord --device=$AUDIO_INPUT --format=S16_LE --rate=48000 --channels=2 --duration=$MAX_DURATION /data/$input_name"
-
+    "parec --format=s16le --rate=48000 --channels=2 /data/$input_name"
 }
 
 stop_recording() {
   echo "Stopping recording..."
   if [ "$(docker ps -q --filter "name=$CONTAINER_NAME")" != "" ]; then
-    # Send SIGINT to arecord process inside the container
-    docker exec "$CONTAINER_NAME" pkill -SIGINT arecord
+    echo "Recording container found. Stopping..."
+    # Send SIGINT to parec process inside the container
+    docker exec "$CONTAINER_NAME" pkill -SIGINT parec
+    echo "Waiting for recording to finish..."
     # Wait for container to exit gracefully
     docker wait "$CONTAINER_NAME"
     return 0
