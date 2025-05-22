@@ -48,7 +48,6 @@ DOCKERFILE
 # Update start_recording to use pulseaudio instead of parec
 start_recording() {
   echo "Started recording..."
-
   input_name=$(basename "$FILE.wav")
 
   docker run -d --rm \
@@ -57,7 +56,7 @@ start_recording() {
     --network none \
     -v "$DIR:/data" \
     speechbubble:latest \
-    "parec --format=s16le --rate=48000 --channels=2 /data/$input_name"
+    "parec -d 1 --file-format=wav /data/$input_name"
 }
 
 stop_recording() {
