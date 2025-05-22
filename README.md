@@ -44,6 +44,9 @@ Press your configured keyboard shortcut to:
 
 ### Setup
 
+> [!TIP]
+> If you want to use it on a mac, you need to help me figure out the transition to pulseaudio https://github.com/naugtur/bubbles/pull/1
+
 1. Install xdotool:
 ```bash
 sudo apt-get install xdotool
