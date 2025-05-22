@@ -1,8 +1,17 @@
 #!/bin/bash
 
 update_image() {
-    docker build -t bubble-sandbox-image - << 'EOF'
+    PACKAGES=${*:-""}
+    
+    # Set package installation line if packages are specified
+    INSTALL_LINE=""
+    if [ ! -z "$PACKAGES" ]; then
+        INSTALL_LINE="RUN apt update && apt install -y $PACKAGES"
+    fi
+    
+    docker build -t bubble-sandbox-image - << EOF
 FROM node:lts 
+$INSTALL_LINE
 RUN mkdir /mountpoint
 RUN chown -R node:node /mountpoint
 USER node
@@ -15,13 +24,15 @@ if [ "$1" = "--help" ]; then
     echo ""
     echo "Options:"
     echo "  --offline   Run container with network access disabled"
-    echo "  --update    Rebuild the docker image"
+    echo "  --rebuild [packages]    Rebuild the docker image with added packages"
     echo "  --help      Show this help message"
     exit 0
 fi
 
-if [ "$1" = "--update" ]; then
-    update_image
+if [ "$1" = "--rebuild" ]; then
+    # Remove the first argument (--rebuild)
+    shift
+    update_image $@
     exit 0
 fi
 

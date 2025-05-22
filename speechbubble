@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configuration
+readonly PID_FILE="${HOME}/.speechbubble/pid"
+readonly FILE="${HOME}/.speechbubble/recording"
+readonly MAX_DURATION=300
+readonly AUDIO_INPUT='hw:0,0' # Use `arecord -l` to list available devices
+readonly MODELS_DIR="${HOME}/.speechbubble/models"
+readonly MODEL_NAME="base.en"
+
+mkdir -p "$(dirname "$PID_FILE")"
+
+start_recording() {
+  mkdir -p "$(dirname "$FILE")"
+  echo "Starting new recording..."
+  nohup arecord --device="$AUDIO_INPUT" --format=S16_LE --rate=48000 --channels=2 "$FILE.wav" --duration="$MAX_DURATION" 2>/dev/null | sox -t wav - -t wav "$FILE.wav" remix 1 &
+  echo $! >"$PID_FILE"
+}
+
+stop_recording() {
+  echo "Stopping recording..."
+  if [ -s "$PID_FILE" ]; then
+    local pid
+    pid=$(<"$PID_FILE")
+    kill "$pid" && wait "$pid" 2>/dev/null || killall -w arecord
+    rm -f "$PID_FILE"
+    return 0
+  fi
+  echo "No recording process found."
+
+}
+
+write_transcript() {
+  perl -pi -e 'chomp if eof' "$FILE.txt"
+  xdotool type --clearmodifiers --file "$FILE.txt"
+}
+
+ensure_model() {
+
+    # Check if image exists, pull if not
+    if ! docker image inspect ghcr.io/ggml-org/whisper.cpp:main >/dev/null 2>&1; then
+        echo "Whisper.cpp Docker image not found. Pulling..."
+        docker pull ghcr.io/ggml-org/whisper.cpp:main
+    fi
+    
+    mkdir -p "$MODELS_DIR"
+    if [ ! -f "${MODELS_DIR}/ggml-${MODEL_NAME}.bin" ]; then
+        echo "Downloading whisper model..."
+        docker run -it --rm \
+            -v "${MODELS_DIR}:/models" \
+            ghcr.io/ggml-org/whisper.cpp:main \
+            "./models/download-ggml-model.sh ${MODEL_NAME} /models"
+    fi
+}
+
+transcribe_with_whispercpp() {
+    echo "Transcribing with whisper.cpp (Docker)..."
+    
+    input_dir=$(dirname "$FILE.wav")
+    input_name=$(basename "$FILE.wav")
+
+
+    ensure_model
+
+    # Run whisper.cpp in Docker with the model
+    docker run --rm \
+        -v "${MODELS_DIR}:/models" \
+        -v "${input_dir}:/data" \
+        --network none \
+        ghcr.io/ggml-org/whisper.cpp:main \
+        "whisper-cli -m /models/ggml-${MODEL_NAME}.bin -np -nt -f /data/${input_name}" > "$FILE.txt"
+
+    if [ ! -s "$FILE.txt" ]; then
+        echo "Error: Transcription failed"
+        exit 1
+    fi
+
+    echo "Transcription completed"
+}
+
+main() {
+    
+  if [[ -f "$PID_FILE" ]]; then
+    stop_recording
+    transcribe_with_whispercpp
+    write_transcript
+  else
+    start_recording
+  fi
+}
+
+main
