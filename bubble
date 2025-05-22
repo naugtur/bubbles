@@ -1,0 +1,46 @@
+#!/bin/bash
+
+update_image() {
+    docker build -t bubble-sandbox-image - << 'EOF'
+FROM node:lts 
+RUN mkdir /mountpoint
+RUN chown -R node:node /mountpoint
+USER node
+WORKDIR /mountpoint
+EOF
+}
+
+if [ "$1" = "--help" ]; then
+    echo "Usage: bubble [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --offline   Run container with network access disabled"
+    echo "  --update    Rebuild the docker image"
+    echo "  --help      Show this help message"
+    exit 0
+fi
+
+if [ "$1" = "--update" ]; then
+    update_image
+    exit 0
+fi
+
+# Check if image exists
+if ! docker image inspect bubble-sandbox-image >/dev/null 2>&1; then
+    echo "Image not found. Building..."
+    update_image
+fi
+
+NETWORK_FLAG=""
+if [ "$1" = "--offline" ]; then
+    NETWORK_FLAG="--network none"
+    shift
+fi
+
+docker run --rm -it \
+  $NETWORK_FLAG \
+  --name bubble-sandbox \
+  --entrypoint bash \
+  -v $(pwd):/mountpoint \
+  bubble-sandbox-image \
+  "$@"
