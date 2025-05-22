@@ -1,7 +1,10 @@
 # bubbles
 
+> A collection of tiny tools that run things in Docker for my personal use.
 
- A collection of tiny tools that run things in Docker for my personal use.
+## Table of Contents
+- [bubble](#bubble) - Open current folder in a container
+- [speechbubble](#speechbubble) - Voice keyboard
 
 --- 
 
@@ -23,7 +26,8 @@ Example: rebuild the image used with added packages for python
 bubble --rebuild python3 python3-pip python3.11-venv
 ```
 
-TODO: preserve bash history inside the bubble
+TODO: 
+ - preserve bash history inside the bubble
 
 ---
 
@@ -59,3 +63,6 @@ Edit these variables at the top of the script:
 - `AUDIO_INPUT` - audio input device (use `arecord -l` to list devices)
 - `MAX_DURATION` - maximum recording duration in seconds
 - `MODEL_NAME` - whisper model to use (default: base.en)
+
+TODO:
+ - put more of the dependencies and processing in the container
