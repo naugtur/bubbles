@@ -44,9 +44,10 @@ Press your configured keyboard shortcut to:
 
 ### Setup
 
-1. Install some system packages:
+1. Install xdotool:
 ```bash
-sudo apt-get install sox arecord xdotool
+sudo apt-get install xdotool
+brew install xdotool
 ```
 
 2. Set up a keyboard shortcut in your desktop environment
@@ -55,7 +56,7 @@ sudo apt-get install sox arecord xdotool
    - Set the command to: `speechbubble`
    - Choose a convenient key combination
 
-3. First run will download the whisper model
+3. First run will download the whisper model and dependencies
 
 ### Configuration
 
@@ -65,4 +66,5 @@ Edit these variables at the top of the script:
 - `MODEL_NAME` - whisper model to use (default: base.en)
 
 TODO:
- - put more of the dependencies and processing in the container
+ - speed it up by using mono sound maybe
+ - externalize hardware configuration
