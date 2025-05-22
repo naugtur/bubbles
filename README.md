@@ -2,7 +2,7 @@
 
 > A collection of tiny tools that run things in Docker for my personal use.
 
-## Table of Contents
+
 - [bubble](#bubble) - Open current folder in a container
 - [speechbubble](#speechbubble) - Voice keyboard
 
