@@ -42,6 +42,8 @@ Press your configured keyboard shortcut to:
 1. First press: Start recording
 2. Second press: Stop recording, transcribe audio and type out the result
 
+Use `speechbubble --rebuild` to force rebuild of the Docker image. (useful if you get the new version of speechbubble script)
+
 ### Setup
 
 > [!TIP]
@@ -69,5 +71,6 @@ Edit these variables at the top of the script:
 - `MODEL_NAME` - whisper model to use (default: base.en)
 
 TODO:
+ - keep the container running and only execute jobs in it
  - speed it up by using mono sound maybe
  - externalize hardware configuration

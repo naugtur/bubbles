@@ -12,10 +12,9 @@ readonly CONTAINER_NAME="speechbubble"
 
 mkdir -p "$DIR"
 
-ensure_image() {
-  if (! docker image inspect speechbubble:latest >/dev/null 2>&1); then
-    echo "Building custom Docker image..."
-    docker build -t speechbubble:latest - <<'DOCKERFILE'
+rebuild_image() {
+  echo "Building custom Docker image..."
+  docker build -t speechbubble:latest - <<'DOCKERFILE'
 FROM ghcr.io/ggml-org/whisper.cpp:main
 
 RUN apt-get update && apt-get install -y \
@@ -23,6 +22,11 @@ RUN apt-get update && apt-get install -y \
     sox \
     && rm -rf /var/lib/apt/lists/*
 DOCKERFILE
+}
+
+ensure_image() {
+  if (! docker image inspect speechbubble:latest >/dev/null 2>&1); then
+    rebuild_image
   fi
 }
 
@@ -100,6 +104,11 @@ transcribe_with_whispercpp() {
 }
 
 main() {
+  if [ "${1:-}" = "--rebuild" ]; then
+    rebuild_image
+    exit 0
+  fi
+  
   ensure_image
   if [ "$(docker ps -q --filter "name=$CONTAINER_NAME")" != "" ]; then
     stop_recording
@@ -110,4 +119,4 @@ main() {
   fi
 }
 
-main
+main "${@:-}"
