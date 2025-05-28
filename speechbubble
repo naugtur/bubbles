@@ -9,6 +9,7 @@ readonly AUDIO_INPUT='hw:0,0' # Use `arecord -l` to list available devices
 readonly MODELS_DIR="${DIR}/models"
 readonly MODEL_NAME="base.en"
 readonly CONTAINER_NAME="speechbubble"
+VERBOSE=false  # default value
 
 mkdir -p "$DIR"
 
@@ -30,19 +31,44 @@ ensure_image() {
   fi
 }
 
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --debug)
+        VERBOSE=true
+        shift
+        ;;
+      --rebuild)
+        rebuild_image
+        exit 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        echo "Usage: $0 [-v|--verbose] [--rebuild]"
+        exit 1
+        ;;
+    esac
+  done
+  return 0
+}
+
 start_recording() {
   echo "Started recording..."
 
   input_name=$(basename "$FILE.wav")
+  
+  output_mode="-d"
+  if [ "$VERBOSE" = true ]; then
+    output_mode="-a stderr"
+  fi
 
-  docker run --rm -d \
+  docker run --rm $output_mode \
     --name "$CONTAINER_NAME" \
     --device=/dev/snd \
     --network none \
     -v "$(dirname "$FILE"):/data" \
     speechbubble:latest \
     "arecord --device=$AUDIO_INPUT --format=S16_LE --rate=48000 --channels=2 --duration=$MAX_DURATION /data/$input_name"
-
 }
 
 stop_recording() {
@@ -104,11 +130,7 @@ transcribe_with_whispercpp() {
 }
 
 main() {
-  if [ "${1:-}" = "--rebuild" ]; then
-    rebuild_image
-    exit 0
-  fi
-  
+  parse_args "$@"
   ensure_image
   if [ "$(docker ps -q --filter "name=$CONTAINER_NAME")" != "" ]; then
     stop_recording
@@ -119,4 +141,4 @@ main() {
   fi
 }
 
-main "${@:-}"
+main "$@"
