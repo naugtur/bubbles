@@ -1,34 +1,40 @@
-import { spawn, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
 import { parseArgs } from "node:util";
 
 export * from "./components.js";
 
-const deepMerge = (target, source) => {
-  for (const key in source) {
-    if (Array.isArray(source[key])) {
-      target[key] = [...(target[key] || []), ...source[key]];
-    } else if (typeof source[key] === "object") {
-      target[key] = deepMerge(target[key] || {}, source[key]);
-    } else {
-      target[key] = source[key];
+/**
+ * @param {import("./components.js").BubbleConfig[]} configs
+ * @returns {Required<import("./components.js").BubbleConfig>}
+ */
+const mergeBubbleConfigs = (configs) =>
+  configs.reduce(
+    (acc, conf) => ({
+      imageTransforms: [
+        ...acc.imageTransforms,
+        ...(conf.imageTransforms ?? []),
+      ],
+      runArgsTransforms: [
+        ...acc.runArgsTransforms,
+        ...(conf.runArgsTransforms ?? []),
+      ],
+    }),
+    {
+      imageTransforms: [],
+      runArgsTransforms: [],
     }
-  }
-  return target;
-};
+  );
 
-const composeDockerfile = (transformers) => {
+const composeDockerfile = (from, transformers) => {
   const setup = transformers.reduce((setup, transform) => transform(setup), []);
-  return setup.join("\n");
+  return `FROM ${from || "node:lts"}\n${setup.join("\n")}\n`;
 };
 
 const buildImage = (name, from, transformers = []) => {
-  const dockerfile = [
-    `FROM ${from || "node:lts"}`,
-    ...composeDockerfile(transformers),
-  ];
+  const dockerfile = composeDockerfile(from, transformers);
   const result = spawnSync("docker", ["build", "-t", name, "-"], {
     input: dockerfile,
-    stdio: ["pipe", process.stdout, process.stderr],
+    // stdio: "pipe",
     encoding: "utf8",
   });
 
@@ -40,7 +46,6 @@ const buildImage = (name, from, transformers = []) => {
 export const without = (handlers, ids) => {
   return handlers.filter((handler) => !ids.includes(handler.id));
 };
-
 
 /**
  * Creates and runs a containerized environment based on provided components
@@ -54,29 +59,57 @@ export const blowBubble = (handlers) => {
       type: "boolean",
       description: "Rebuild the Docker image even if already exists",
     },
+    {
+      name: "dryRun",
+      type: "boolean",
+      description: "prints resulting configs, does nothing",
+    },
     ...handlers.flatMap((handler) => handler.options),
   ];
   const { values, positionals } = parseArgs({
     options: Object.fromEntries(
-      allOptions
-        .map(({ name, ...rest }) => [name, rest])
+      allOptions.map(({ name, type, description }) => [
+        name,
+        { type, description },
+      ])
     ),
     allowPositionals: true,
     strict: false,
   });
 
-  // Run all handlers in order and merge their results
   /** @type {Array<import('./types').BubbleConfig>} */
   const results = handlers.map((handler) =>
     handler.handler({ values, positionals, options: allOptions })
   );
-  const finalConfig = results.reduce((acc, result) => deepMerge(acc, result), {
-    imageTransforms: [],
-    runArgsTransforms: [],
-  });
+  const finalConfig = mergeBubbleConfigs(results);
 
   const name = `bubble-${values.name || "sandbox"}`;
   const imageName = `${name}-image`;
+
+  const baseDockerArgs = ["--rm", "--name", name, "--entrypoint", "bash"];
+
+  const finalDockerArgs = [
+    ...finalConfig.runArgsTransforms.reduce(
+      (args, transform) => transform(args, values),
+      baseDockerArgs
+    ),
+    imageName,
+    ...positionals,
+  ];
+
+  if (values.dryRun) {
+    console.log(`Dry run mode enabled. Docker image will not be built or run.
+
+**Image name**
+${imageName}
+
+**Run arguments**
+${finalDockerArgs.join("\n")}
+
+**Dockerfile content**
+${composeDockerfile(values.from, finalConfig.imageTransforms)}`);
+    process.exit(0);
+  }
 
   const updateImage = () => {
     const allTransformers = [...finalConfig.imageTransforms];
@@ -98,26 +131,9 @@ export const blowBubble = (handlers) => {
     }
   }
 
-  const baseDockerArgs = [
-    "--rm",
-    "--name",
-    name,
-    "--entrypoint",
-    "bash",
-    imageName,
-    ...positionals,
-  ];
+  log("Final Docker run arguments:", finalDockerArgs);
 
-  const finalDockerArgs = finalConfig.runArgsTransforms.reduce(
-    (args, transform) => transform(args, values),
-    baseDockerArgs
-  );
-
-  const docker = spawn("docker", ["run", ...finalDockerArgs], {
+  spawnSync("docker", ["run", ...finalDockerArgs], {
     stdio: "inherit",
-  });
-
-  docker.on("close", (code) => {
-    process.exit(code);
   });
 };

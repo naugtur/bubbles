@@ -1,3 +1,5 @@
+// @ts-check
+
 /** @typedef {import('./types').BubbleComponent} BubbleComponent */
 /** @typedef {import('./types').BubbleOption} BubbleOption */
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
@@ -5,11 +7,11 @@
 import { basename } from "node:path";
 
 /**
- * Creates a component that sets up a mountpoint in the container
  * @param {string} [path="/mountpoint"] - Path to mount
+ * @param {string} [user="node"] - User to own the mountpoint
  * @returns {BubbleComponent}
  */
-export const withMountpoint = (path = "/mountpoint") => ({
+export const withMountpoint = (path = "/mountpoint", user) => ({
   id: "withMountpoint",
   options: [],
   handler: () => {
@@ -18,7 +20,7 @@ export const withMountpoint = (path = "/mountpoint") => ({
         (setup = []) => [
           ...setup,
           `RUN mkdir ${path}`,
-          `RUN chown -R node:node ${path}`,
+          `RUN chown -R ${user}:${user} ${path}`,
           `WORKDIR ${path}`,
         ],
       ],
@@ -44,7 +46,7 @@ export const withOfflineOption = () => ({
   ],
   handler: ({ values }) => ({
     runArgsTransforms: values.offline
-      ? [(args) => ["--network", "none", ...args]]
+      ? [(args) => [...args, "--network", "none"]]
       : [],
   }),
 });
@@ -72,13 +74,14 @@ export const withHelp = () => ({
       description: "Show help information",
     },
   ],
-  handler: ({ values, options }) => {
+  handler: ({ values, options = [] }) => {
     if (values.help) {
       console.log(`Usage: ${basename(process.argv[1])} [OPTIONS]
 Options:
-  ${options.map((opt) => `--${opt.name}\t ${opt.description}`).join("\n ")}`);
+  ${options.map((opt) => `--${opt.name}\t ${opt.description}`).join("\n  ")}`);
+      process.exit(0);
     }
-    process.exit(0);
+    return {};
   },
 });
 
@@ -113,9 +116,9 @@ export const withPackagesOption = () => ({
   id: "withPackagesOption",
   options: [
     {
-      name: "packages",
+      name: "apt",
       type: "string",
-      description: "Comma-separated list of packages to install",
+      description: "Comma-separated list of packages to install with apt",
     },
   ],
   handler: ({ values }) => ({
@@ -125,6 +128,30 @@ export const withPackagesOption = () => ({
             `RUN apt update && apt install -y ${values.packages
               .split(",")
               .join(" ")}`,
+            ...setup,
+          ],
+        ]
+      : [],
+  }),
+});
+/**
+ * Creates a component that adds package installation option
+ * @returns {BubbleComponent}
+ */
+export const withNpmPackagesOption = () => ({
+  id: "withNpmPackagesOption",
+  options: [
+    {
+      name: "npm",
+      type: "string",
+      description: "Comma-separated list of packages to install with npm -g",
+    },
+  ],
+  handler: ({ values }) => ({
+    imageTransforms: values.packages
+      ? [
+          (setup) => [
+            `RUN npm install -g ${values.packages.split(",").join(" ")}`,
             ...setup,
           ],
         ]
@@ -168,7 +195,7 @@ export const withRuns = (runs) => ({
 });
 /**
  * Creates a component that adds RUN commands
- * @param {string[]} runs - Commands to run
+ * @param {string} cmd - Commands to run
  * @returns {BubbleComponent}
  */
 export const withCMD = (cmd) => ({
@@ -181,6 +208,25 @@ export const withCMD = (cmd) => ({
           throw new Error("CMD command already set, cannot add another one");
         }
         return [...setup, `CMD ${cmd}`];
+      },
+    ],
+  }),
+});
+/**
+ * Creates a component that adds RUN commands
+ * @param {string} user - Commands to run
+ * @returns {BubbleComponent}
+ */
+export const withUser = (user) => ({
+  id: "withUser",
+  options: [],
+  handler: ({ values }) => ({
+    imageTransforms: [
+      (setup) => {
+        if (setup[setup.length - 1]?.startsWith("USER ")) {
+          throw new Error("USER command already set, cannot add another one");
+        }
+        return [...setup, `USER ${user}`];
       },
     ],
   }),

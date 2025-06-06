@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 
-import { 
+import {
   withDefaults,
   withHelp,
   withInteractive,
   withPackagesOption,
+  withNpmPackagesOption,
   withOfflineOption,
   withMountpoint,
- } from "@bubble-run/bubble-run";
+  withUser,
+} from "../framework/index.js";
 
 export default [
   withDefaults({
     from: "node:lts",
     name: "sandbox",
-    user: "node",
   }),
   withHelp(),
   withInteractive(),
   withPackagesOption(),
+  withNpmPackagesOption(),
   withOfflineOption(),
-  withMountpoint("/mountpoint"),
-]
+  withMountpoint("/mountpoint", "node"),
+  withUser("node"),
+];

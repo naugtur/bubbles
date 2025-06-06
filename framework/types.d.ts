@@ -1,9 +1,8 @@
+import { ParseArgsOptionConfig } from 'node:util';
+
 export interface BubbleOption {
-  /** Option name */
   name: string;
-  /** Option type (boolean|string) */
-  type: string;
-  /** Option description */
+  type: ParseArgsOptionConfig['type'];
   description?: string;
 }
 
@@ -15,12 +14,11 @@ export interface BubbleConfig {
 }
 
 export interface BubbleComponent {
-  /** CLI options */
+  id: string;
   options: BubbleOption[];
-  /** Handler function */
-  handler: (params: { 
-    values: Record<string, any>; 
-    positionals?: string[]; 
-    options?: BubbleOption[] 
+  handler: (params: {
+    values: Record<string, any>;
+    positionals?: string[];
+    options?: BubbleOption[]
   }) => BubbleConfig;
 }
