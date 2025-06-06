@@ -1,10 +1,10 @@
-// @ts-check
 import { spawnSync } from "child_process";
 import { parseArgs } from "node:util";
 
 export * from "./components.js";
 
 /** @typedef {import("./components.js").BubbleConfig} BubbleConfig */
+/** @typedef {import("./components.js").BubbleOption} BubbleOption */
 
 /**
  * @param {BubbleConfig[]} configs
@@ -17,6 +17,8 @@ const mergeBubbleConfigs = (configs) =>
      * @return {Required<BubbleConfig>}
      */
     (acc, conf) => ({
+      ...acc,
+      ...conf,
       imageTransforms: [
         ...acc.imageTransforms,
         ...(conf.imageTransforms || []),
@@ -46,6 +48,7 @@ const buildImage = (name, from, transformers = []) => {
   });
 
   if (result.status !== 0) {
+    console.error(`Error building Docker image ${name}:\n${result.stderr}`);
     process.exit(1);
   }
 };
@@ -60,6 +63,7 @@ export const without = (handlers, ids) => {
  * @returns {void}
  */
 export const blowBubble = (handlers) => {
+  /** @type {BubbleOption[]} */
   const allOptions = [
     {
       name: "rebuild",
@@ -90,7 +94,7 @@ export const blowBubble = (handlers) => {
   );
   const finalConfig = mergeBubbleConfigs(results);
 
-  const name = `bubble-${values.name || "sandbox"}`;
+  const name = `bubble-${finalConfig.name || "sandbox"}`;
   const imageName = `${name}-image`;
 
   const baseDockerArgs = ["--rm", "--name", name, "--entrypoint", "bash"];
@@ -114,14 +118,14 @@ ${imageName}
 ${finalDockerArgs.join("\n")}
 
 **Dockerfile content**
-${composeDockerfile(values.from, finalConfig.imageTransforms)}`);
+${composeDockerfile(finalConfig.from, finalConfig.imageTransforms)}`);
     process.exit(0);
   }
 
   const updateImage = () => {
     const allTransformers = [...finalConfig.imageTransforms];
 
-    buildImage(imageName, values.from, allTransformers);
+    buildImage(imageName, finalConfig.from, allTransformers);
   };
 
   if (values.rebuild) {

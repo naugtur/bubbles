@@ -1,7 +1,7 @@
 {
   "name": "bubbles",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "framework/index.js",
   "type": "module",
   "scripts": {
     "build": "node framework/generate-cli.js",
@@ -22,5 +22,8 @@
   "bin": {
     "bubble-bg": "./cli/bubble-bg.js",
     "bubble": "./cli/bubble.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30"
   }
 }

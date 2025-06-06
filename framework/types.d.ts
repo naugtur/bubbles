@@ -1,12 +1,14 @@
-import { ParseArgsOptionConfig } from 'node:util';
+import { ParseArgsOptionsConfig, ParseArgsOptionsType } from 'node:util';
 
 export interface BubbleOption {
-  name: string;
-  type: ParseArgsOptionConfig['type'];
+  name: keyof ParseArgsOptionsConfig;
+  type: ParseArgsOptionsType;
   description?: string;
 }
 
 export interface BubbleConfig {
+  name?: string,
+  from?: string,
   /** Dockerfile transformations */
   imageTransforms?: Array<(setup: string[]) => string[]>;
   /** Docker run arguments transformations */

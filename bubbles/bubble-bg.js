@@ -1,5 +1,5 @@
 import bubble from "./bubble.js";
-import { withDetached, without } from "../framework/index.js";
+import { withDetached, withDefaults, without } from "../framework/index.js";
 
 export default [
   ...without(bubble, ["withInteractive"]),

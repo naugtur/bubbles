@@ -1,5 +1,3 @@
-// @ts-check
-
 /** @typedef {import('./types').BubbleComponent} BubbleComponent */
 /** @typedef {import('./types').BubbleOption} BubbleOption */
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
@@ -185,11 +183,10 @@ export const withPackages = (packages) => ({
 export const withNpmPackages = (packages) => ({
   id: "withNpmPackages",
   options: [],
-  handler: ({ values }) => ({
+  handler: () => ({
     imageTransforms: [
       (setup) => [
-        `RUN npm install -g ${values.packages
-          .join(" ")}`,
+        `RUN npm install -g ${packages.join(" ")}`,
         ...setup,
       ],
     ],
@@ -254,6 +251,38 @@ export const withUser = (user) => ({
     ],
     runArgsTransforms: values.history
       ? [(args) => [...args, "-v", `${process.env.HOME}/.bash_history:/home/${user}/.bash_history`]]
+      : [],
+  }),
+});
+/**
+ * Creates a component that exposes a specific port
+ * @param {number} port - Port number to expose
+ * @returns {BubbleComponent}
+ */
+export const withPort = (port) => ({
+  id: "withPort",
+  options: [],
+  handler: () => ({
+    runArgsTransforms: [(args) => [...args, "-p", `${port}:${port}`]],
+  }),
+});
+
+/**
+ * Creates a component that adds a port exposure option
+ * @returns {BubbleComponent}
+ */
+export const withPortsOption = () => ({
+  id: "withPortOption",
+  options: [
+    {
+      name: "portforward",
+      type: "string",
+      description: "Port number to expose from the container",
+    },
+  ],
+  handler: ({ values }) => ({
+    runArgsTransforms: values.portforward
+      ? [(args) => [...args, "-P"]]
       : [],
   }),
 });
