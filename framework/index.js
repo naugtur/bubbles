@@ -1,22 +1,29 @@
+// @ts-check
 import { spawnSync } from "child_process";
 import { parseArgs } from "node:util";
 
 export * from "./components.js";
 
+/** @typedef {import("./components.js").BubbleConfig} BubbleConfig */
+
 /**
- * @param {import("./components.js").BubbleConfig[]} configs
- * @returns {Required<import("./components.js").BubbleConfig>}
+ * @param {BubbleConfig[]} configs
  */
 const mergeBubbleConfigs = (configs) =>
   configs.reduce(
+    /**
+     * @param {Required<BubbleConfig>} acc
+     * @param {BubbleConfig} conf
+     * @return {Required<BubbleConfig>}
+     */
     (acc, conf) => ({
       imageTransforms: [
         ...acc.imageTransforms,
-        ...(conf.imageTransforms ?? []),
+        ...(conf.imageTransforms || []),
       ],
       runArgsTransforms: [
         ...acc.runArgsTransforms,
-        ...(conf.runArgsTransforms ?? []),
+        ...(conf.runArgsTransforms || []),
       ],
     }),
     {
@@ -77,7 +84,7 @@ export const blowBubble = (handlers) => {
     strict: false,
   });
 
-  /** @type {Array<import('./types').BubbleConfig>} */
+  /** @type {BubbleConfig[]} */
   const results = handlers.map((handler) =>
     handler.handler({ values, positionals, options: allOptions })
   );
@@ -90,7 +97,7 @@ export const blowBubble = (handlers) => {
 
   const finalDockerArgs = [
     ...finalConfig.runArgsTransforms.reduce(
-      (args, transform) => transform(args, values),
+      (args, transform) => transform(args),
       baseDockerArgs
     ),
     imageName,
@@ -130,8 +137,6 @@ ${composeDockerfile(values.from, finalConfig.imageTransforms)}`);
       updateImage();
     }
   }
-
-  log("Final Docker run arguments:", finalDockerArgs);
 
   spawnSync("docker", ["run", ...finalDockerArgs], {
     stdio: "inherit",
