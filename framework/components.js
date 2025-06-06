@@ -171,7 +171,24 @@ export const withPackages = (packages) => ({
     imageTransforms: [
       (setup) => [
         `RUN apt update && apt install -y ${values.packages
-          .split(",")
+          .join(" ")}`,
+        ...setup,
+      ],
+    ],
+  }),
+});
+/**
+ * Creates a component that installs specified packages
+ * @param {string[]} packages - Packages to install
+ * @returns {BubbleComponent}
+ */
+export const withNpmPackages = (packages) => ({
+  id: "withNpmPackages",
+  options: [],
+  handler: ({ values }) => ({
+    imageTransforms: [
+      (setup) => [
+        `RUN npm install -g ${values.packages
           .join(" ")}`,
         ...setup,
       ],
@@ -219,7 +236,13 @@ export const withCMD = (cmd) => ({
  */
 export const withUser = (user) => ({
   id: "withUser",
-  options: [],
+  options: [
+    {
+      name: "history",
+      type: "boolean",
+      description: "Mount local bash history into container",
+    },
+  ],
   handler: ({ values }) => ({
     imageTransforms: [
       (setup) => {
@@ -229,5 +252,10 @@ export const withUser = (user) => ({
         return [...setup, `USER ${user}`];
       },
     ],
+    runArgsTransforms: values.history
+      ? [(args) => [...args, "-v", `${process.env.HOME}/.bash_history:/home/${user}/.bash_history`]]
+      : [],
   }),
 });
+
+
