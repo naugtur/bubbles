@@ -97,7 +97,7 @@ export const blowBubble = (handlers) => {
   const name = `bubble-${finalConfig.name || "sandbox"}`;
   const imageName = `${name}-image`;
 
-  const baseDockerArgs = ["--rm", "--name", name, "--entrypoint", "bash"];
+  const baseDockerArgs = ["--rm", "--name", name];
 
   const finalDockerArgs = [
     ...finalConfig.runArgsTransforms.reduce(

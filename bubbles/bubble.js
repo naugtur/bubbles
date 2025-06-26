@@ -9,6 +9,7 @@ import {
   withOfflineOption,
   withMountpoint,
   withUser,
+  withEntrypoint,
 } from "../framework/index.js";
 
 export default [
@@ -21,6 +22,7 @@ export default [
   withPackagesOption(),
   withNpmPackagesOption(),
   withOfflineOption(),
+  withEntrypoint("bash"),
   withMountpoint("/mountpoint", "node"),
   withUser("node"),
 ];

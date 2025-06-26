@@ -21,7 +21,12 @@
   "description": "",
   "bin": {
     "bubble-bg": "./cli/bubble-bg.js",
-    "bubble": "./cli/bubble.js"
+    "bubble": "./cli/bubble.js",
+    "bubble-amp": "./cli/bubble-amp.js",
+    "bubble-burst": "./cli/bubble-burst.js",
+    "bubble-hardened": "./cli/bubble-hardened.js",
+    "bubble-npm": "./cli/bubble-npm.js",
+    "bubble-npm-hardened": "./cli/bubble-npm-hardened.js"
   },
   "devDependencies": {
     "@types/node": "^22.15.30"

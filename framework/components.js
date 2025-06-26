@@ -266,6 +266,18 @@ export const withPort = (port) => ({
     runArgsTransforms: [(args) => [...args, "-p", `${port}:${port}`]],
   }),
 });
+/**
+ * selects an entrypoint
+ * @param {string} entrypoint - Port number to expose
+ * @returns {BubbleComponent}
+ */
+export const withEntrypoint = (entrypoint) => ({
+  id: "withEntrypoint",
+  options: [],
+  handler: () => ({
+    runArgsTransforms: [(args) => [...args, "--entrypoint", entrypoint]],
+  }),
+});
 
 /**
  * Creates a component that adds a port exposure option
@@ -284,6 +296,66 @@ export const withPortsOption = () => ({
     runArgsTransforms: values.portforward
       ? [(args) => [...args, "-P"]]
       : [],
+  }),
+});
+
+/**
+ * Creates a component that adds a file to the container
+ * @param {string} path - Path where to create the file in container
+ * @param {string} content - Content of the file
+ * @returns {BubbleComponent}
+ */
+export const withFile = (path, content) => ({
+  id: "withFile",
+  options: [],
+  handler: () => ({
+    imageTransforms: [
+      (setup) => [
+        ...setup,
+        `RUN cat <<'EOF' > ${path}\n${content}\nEOF`,
+      ],
+    ],
+  }),
+});
+
+/**
+ * Creates a component that adds command aliases to the container
+ * @param {Object.<string, string>} aliases - Object mapping alias names to commands
+ * @returns {BubbleComponent}
+ */
+export const withAliases = (aliases) => ({
+  id: "withAliases",
+  options: [],
+  handler: () => ({
+    imageTransforms: [
+      (setup) => [
+        ...setup,
+        ...Object.entries(aliases).map(([alias, command]) => 
+          `RUN echo 'alias ${alias}="${command.replace(/"/g, '\\"')}"' >> ~/.bashrc`
+        )
+      ],
+    ],
+  }),
+});
+
+
+/**
+ * Creates a component that sets environment variables in the container
+ * @param {Object.<string, string>} env - Object mapping environment variable names to values
+ * @returns {BubbleComponent}
+ */
+export const withEnv = (env) => ({
+  id: "withEnv",
+  options: [],
+  handler: () => ({
+    imageTransforms: [
+      (setup) => [
+        ...setup,
+        ...Object.entries(env).map(([key, value]) => 
+          `ENV ${key}=${value}`
+        )
+      ],
+    ],
   }),
 });
 
