@@ -26,7 +26,12 @@
     "bubble-burst": "./cli/bubble-burst.js",
     "bubble-hardened": "./cli/bubble-hardened.js",
     "bubble-npm": "./cli/bubble-npm.js",
-    "bubble-npm-hardened": "./cli/bubble-npm-hardened.js"
+    "bubble-npm-hardened": "./cli/bubble-npm-hardened.js",
+    "safer-npm": "./cli/safer-npm.js",
+    "safer-npx": "./cli/safer-npx.js",
+    "safer-yarn": "./cli/safer-yarn.js",
+    "safer-pnpm": "./cli/safer-pnpm.js",
+    "safer-pnpx": "./cli/safer-pnpx.js"
   },
   "devDependencies": {
     "@types/node": "^22.15.30"
