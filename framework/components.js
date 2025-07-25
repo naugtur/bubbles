@@ -3,6 +3,7 @@
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
 
 import { basename } from "node:path";
+import dns from "node:dns/promises";
 
 /**
  * @param {string} [path="/mountpoint"] - Path to mount
@@ -91,7 +92,7 @@ export const withInteractive = () => ({
   id: "withInteractive",
   options: [],
   handler: () => ({
-    runArgsTransforms: [(args) => ["-it", ...args]],
+    runArgsTransforms: [(args) => ["-it", "-e", `TERM=${process.env.TERM}`, ...args]],
   }),
 });
 /**
@@ -122,13 +123,13 @@ export const withPackagesOption = () => ({
   handler: ({ values }) => ({
     imageTransforms: values.packages
       ? [
-          (setup) => [
-            `RUN apt update && apt install -y ${values.packages
-              .split(",")
-              .join(" ")}`,
-            ...setup,
-          ],
-        ]
+        (setup) => [
+          `RUN apt update && apt install -y ${values.packages
+            .split(",")
+            .join(" ")}`,
+          ...setup,
+        ],
+      ]
       : [],
   }),
 });
@@ -148,11 +149,11 @@ export const withNpmPackagesOption = () => ({
   handler: ({ values }) => ({
     imageTransforms: values.packages
       ? [
-          (setup) => [
-            `RUN npm install -g ${values.packages.split(",").join(" ")}`,
-            ...setup,
-          ],
-        ]
+        (setup) => [
+          `RUN npm install -g ${values.packages.split(",").join(" ")}`,
+          ...setup,
+        ],
+      ]
       : [],
   }),
 });
@@ -330,7 +331,7 @@ export const withAliases = (aliases) => ({
     imageTransforms: [
       (setup) => [
         ...setup,
-        ...Object.entries(aliases).map(([alias, command]) => 
+        ...Object.entries(aliases).map(([alias, command]) =>
           `RUN echo 'alias ${alias}="${command.replace(/"/g, '\\"')}"' >> ~/.bashrc`
         )
       ],
@@ -351,12 +352,61 @@ export const withEnv = (env) => ({
     imageTransforms: [
       (setup) => [
         ...setup,
-        ...Object.entries(env).map(([key, value]) => 
+        ...Object.entries(env).map(([key, value]) =>
           `ENV ${key}=${value}`
         )
       ],
     ],
   }),
+});
+
+/**
+ * Creates a component that prints an ASCII art of a bubble
+ * @returns {BubbleComponent}
+ */
+export const withArt = () => ({
+  id: "withArt",
+  options: [],
+  handler: () => {
+    console.log(` . ∘  ◯ ◦ (running in a bubble) ○◦ *  •`);
+    return {};
+  },
+});
+
+
+/**
+ * BROKEN and probably not the right thing to do
+ * Creates a component that disables all network except for npm registry access.
+ * Looks up the IP of the npm registry, allows only that IP in iptables,
+ * and adds a static /etc/hosts entry for registry.npmjs.org.
+ * @returns {BubbleComponent}
+ */
+export const withOfflineButNpm = () => ({
+  id: "withOfflineButNpm",
+  options: [],
+  handler: () => {
+    let npmRegistryIp = "104.16.30.34"; // default
+    // try {
+    //   const addresses = await dns.lookup("registry.npmjs.org", { all: true });
+    //   if (addresses.length > 0) {
+    //     npmRegistryIp = addresses[0].address;
+    //   }
+    // } catch (e) {
+    //   // fallback to default if lookup fails
+    // }
+
+    return {
+      imageTransforms: [
+        (setup = []) => [
+          `RUN apt-get update && apt-get install -y iptables`,
+          `RUN iptables -A OUTPUT -d ${npmRegistryIp} -j ACCEPT`,
+          `RUN iptables -A OUTPUT -j DROP`,
+          `RUN echo "${npmRegistryIp} registry.npmjs.org" >> /etc/hosts`,
+          ...setup,
+        ],
+      ],
+    };
+  },
 });
 
 

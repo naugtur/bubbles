@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import {
+  withArt,
   withDefaults,
   withHelp,
   withInteractive,
@@ -17,6 +18,7 @@ export default [
     from: "node:lts",
     name: "sandbox",
   }),
+  withArt(),
   withHelp(),
   withInteractive(),
   withPackagesOption(),

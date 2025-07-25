@@ -31,7 +31,13 @@
     "safer-npx": "./cli/safer-npx.js",
     "safer-yarn": "./cli/safer-yarn.js",
     "safer-pnpm": "./cli/safer-pnpm.js",
-    "safer-pnpx": "./cli/safer-pnpx.js"
+    "safer-pnpx": "./cli/safer-pnpx.js",
+    "bubble-install-clis": "./cli/bubble-install-clis.js",
+    "npms": "./cli/npms.js",
+    "npxs": "./cli/npxs.js",
+    "yarns": "./cli/yarns.js",
+    "pnpms": "./cli/pnpms.js",
+    "pnpxs": "./cli/pnpxs.js"
   },
   "devDependencies": {
     "@types/node": "^22.15.30"

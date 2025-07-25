@@ -6,10 +6,11 @@ import {
 } from "../framework/index.js";
 
 export default (command)=>[
-  ...without(bubble, ["withInteractive", "withEntrypoint"]),
+  ...without(bubble, [
+    "withEntrypoint"
+  ]),
   withDefaults({
     name: "cli",
   }),
-  // TODO get the tty info forwarded somehow so it does color
   withEntrypoint(command)
 ];

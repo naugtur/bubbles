@@ -8,11 +8,11 @@ import {
 } from "../framework/index.js";
 
 export default [
-  ...bubble,
-  // ...without(bubble, ["withInteractive", "withEntrypoint"]),
+  ...without(bubble, ["withEntrypoint"]),
   withDefaults({
     name: "npm-hardened",
   }),
+  // withOfflineButNpm(),
   // withEntrypoint("npm"),
   withFile(
     "~/.npmrc",

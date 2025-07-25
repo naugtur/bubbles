@@ -51,6 +51,7 @@ const buildImage = (name, from, transformers = []) => {
     console.error(`Error building Docker image ${name}:\n${result.stderr}`);
     process.exit(1);
   }
+  console.log('rebuilt')
 };
 
 export const without = (handlers, ids) => {
