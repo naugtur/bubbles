@@ -17,13 +17,13 @@ Usage: bubble [OPTIONS]
 
 Options:
   --offline   Run container without network access
-  --rebuild [packages]    Rebuild the docker image with added packages
+  --bbl-rebuild [packages]    bbl-rebuild the docker image with added packages
   --help      Show this help message
 ```
 
-Example: rebuild the image used with added packages for python
+Example: bbl-rebuild the image used with added packages for python
 ```
-bubble --rebuild python3 python3-pip python3.11-venv
+bubble --bbl-rebuild python3 python3-pip python3.11-venv
 ```
 
 TODO: 
@@ -42,7 +42,7 @@ Press your configured keyboard shortcut to:
 1. First press: Start recording
 2. Second press: Stop recording, transcribe audio and type out the result
 
-Use `speechbubble --rebuild` to force rebuild of the Docker image. (useful if you get the new version of speechbubble script)
+Use `speechbubble --bbl-rebuild` to force bbl-rebuild of the Docker image. (useful if you get the new version of speechbubble script)
 
 ### Setup
 

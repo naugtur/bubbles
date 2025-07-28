@@ -13,7 +13,7 @@ VERBOSE=false  # default value
 
 mkdir -p "$DIR"
 
-rebuild_image() {
+bbl-rebuild_image() {
   echo "Building custom Docker image..."
   docker build -t speechbubble:latest - <<'DOCKERFILE'
 FROM ghcr.io/ggml-org/whisper.cpp:main
@@ -27,7 +27,7 @@ DOCKERFILE
 
 ensure_image() {
   if (! docker image inspect speechbubble:latest >/dev/null 2>&1); then
-    rebuild_image
+    bbl-rebuild_image
   fi
 }
 
@@ -38,13 +38,13 @@ parse_args() {
         VERBOSE=true
         shift
         ;;
-      --rebuild)
-        rebuild_image
+      --bbl-rebuild)
+        bbl-rebuild_image
         exit 0
         ;;
       *)
         echo "Unknown option: $1"
-        echo "Usage: $0 [-v|--verbose] [--rebuild]"
+        echo "Usage: $0 [-v|--verbose] [--bbl-rebuild]"
         exit 1
         ;;
     esac

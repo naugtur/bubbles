@@ -3,6 +3,8 @@ import { parseArgs } from "node:util";
 
 export * from "./components.js";
 
+export { default as bubble } from "./bubble.js";
+
 /** @typedef {import("./components.js").BubbleConfig} BubbleConfig */
 /** @typedef {import("./components.js").BubbleOption} BubbleOption */
 
@@ -51,7 +53,7 @@ const buildImage = (name, from, transformers = []) => {
     console.error(`Error building Docker image ${name}:\n${result.stderr}`);
     process.exit(1);
   }
-  console.log('rebuilt')
+  console.log("rebuilt. ∘  ◯ ◦");
 };
 
 export const without = (handlers, ids) => {
@@ -64,15 +66,16 @@ export const without = (handlers, ids) => {
  * @returns {void}
  */
 export const blowBubble = (handlers) => {
+  handlers = handlers.flat(); // just in case we forget to ...
   /** @type {BubbleOption[]} */
   const allOptions = [
     {
-      name: "rebuild",
+      name: "bbl-rebuild",
       type: "boolean",
       description: "Rebuild the Docker image even if already exists",
     },
     {
-      name: "dryRun",
+      name: "bbl-dry-run",
       type: "boolean",
       description: "prints resulting configs, does nothing",
     },
@@ -90,9 +93,10 @@ export const blowBubble = (handlers) => {
   });
 
   /** @type {BubbleConfig[]} */
-  const results = handlers.map((handler) =>
-    handler.handler({ values, positionals, options: allOptions })
-  );
+  const results = handlers
+    .map((handler) =>
+      handler.handler({ values, positionals, options: allOptions })
+    )
   const finalConfig = mergeBubbleConfigs(results);
 
   const name = `bubble-${finalConfig.name || "sandbox"}`;
@@ -109,7 +113,7 @@ export const blowBubble = (handlers) => {
     ...positionals,
   ];
 
-  if (values.dryRun) {
+  if (values.bblDryRun) {
     console.log(`Dry run mode enabled. Docker image will not be built or run.
 
 **Image name**
@@ -129,7 +133,7 @@ ${composeDockerfile(finalConfig.from, finalConfig.imageTransforms)}`);
     buildImage(imageName, finalConfig.from, allTransformers);
   };
 
-  if (values.rebuild) {
+  if (values.bblRebuild) {
     updateImage();
   } else {
     // Check if image exists

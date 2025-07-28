@@ -1,4 +1,4 @@
-import bubble from "./bubble.js";
+import bubble from "../framework/bubble.js";
 import {
   withCMD,
   withDefaults,

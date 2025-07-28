@@ -11,7 +11,8 @@ import {
   withMountpoint,
   withUser,
   withEntrypoint,
-} from "../framework/index.js";
+  requireExtensions,
+} from "./index.js";
 
 export default [
   withDefaults({
@@ -24,7 +25,10 @@ export default [
   withPackagesOption(),
   withNpmPackagesOption(),
   withOfflineOption(),
+  ...requireExtensions("root"),
   withEntrypoint("bash"),
   withMountpoint("/mountpoint", "node"),
   withUser("node"),
+  ...requireExtensions("user"),
+
 ];

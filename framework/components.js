@@ -2,8 +2,8 @@
 /** @typedef {import('./types').BubbleOption} BubbleOption */
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
 
-import { basename } from "node:path";
-import dns from "node:dns/promises";
+import { basename, join } from "node:path";
+import { createRequire } from "node:module";
 
 /**
  * @param {string} [path="/mountpoint"] - Path to mount
@@ -92,7 +92,9 @@ export const withInteractive = () => ({
   id: "withInteractive",
   options: [],
   handler: () => ({
-    runArgsTransforms: [(args) => ["-it", "-e", `TERM=${process.env.TERM}`, ...args]],
+    runArgsTransforms: [
+      (args) => ["-it", "-e", `TERM=${process.env.TERM}`, ...args],
+    ],
   }),
 });
 /**
@@ -123,13 +125,13 @@ export const withPackagesOption = () => ({
   handler: ({ values }) => ({
     imageTransforms: values.packages
       ? [
-        (setup) => [
-          `RUN apt update && apt install -y ${values.packages
-            .split(",")
-            .join(" ")}`,
-          ...setup,
-        ],
-      ]
+          (setup) => [
+            `RUN apt update && apt install -y ${values.packages
+              .split(",")
+              .join(" ")}`,
+            ...setup,
+          ],
+        ]
       : [],
   }),
 });
@@ -149,11 +151,11 @@ export const withNpmPackagesOption = () => ({
   handler: ({ values }) => ({
     imageTransforms: values.packages
       ? [
-        (setup) => [
-          `RUN npm install -g ${values.packages.split(",").join(" ")}`,
-          ...setup,
-        ],
-      ]
+          (setup) => [
+            `RUN npm install -g ${values.packages.split(",").join(" ")}`,
+            ...setup,
+          ],
+        ]
       : [],
   }),
 });
@@ -169,8 +171,7 @@ export const withPackages = (packages) => ({
   handler: ({ values }) => ({
     imageTransforms: [
       (setup) => [
-        `RUN apt update && apt install -y ${values.packages
-          .join(" ")}`,
+        `RUN apt update && apt install -y ${values.packages.join(" ")}`,
         ...setup,
       ],
     ],
@@ -186,10 +187,7 @@ export const withNpmPackages = (packages) => ({
   options: [],
   handler: () => ({
     imageTransforms: [
-      (setup) => [
-        `RUN npm install -g ${packages.join(" ")}`,
-        ...setup,
-      ],
+      (setup) => [`RUN npm install -g ${packages.join(" ")}`, ...setup],
     ],
   }),
 });
@@ -251,7 +249,13 @@ export const withUser = (user) => ({
       },
     ],
     runArgsTransforms: values.history
-      ? [(args) => [...args, "-v", `${process.env.HOME}/.bash_history:/home/${user}/.bash_history`]]
+      ? [
+          (args) => [
+            ...args,
+            "-v",
+            `${process.env.HOME}/.bash_history:/home/${user}/.bash_history`,
+          ],
+        ]
       : [],
   }),
 });
@@ -294,9 +298,7 @@ export const withPortsOption = () => ({
     },
   ],
   handler: ({ values }) => ({
-    runArgsTransforms: values.portforward
-      ? [(args) => [...args, "-P"]]
-      : [],
+    runArgsTransforms: values.portforward ? [(args) => [...args, "-P"]] : [],
   }),
 });
 
@@ -311,10 +313,7 @@ export const withFile = (path, content) => ({
   options: [],
   handler: () => ({
     imageTransforms: [
-      (setup) => [
-        ...setup,
-        `RUN cat <<'EOF' > ${path}\n${content}\nEOF`,
-      ],
+      (setup) => [...setup, `RUN cat <<'EOF' > ${path}\n${content}\nEOF`],
     ],
   }),
 });
@@ -331,14 +330,17 @@ export const withAliases = (aliases) => ({
     imageTransforms: [
       (setup) => [
         ...setup,
-        ...Object.entries(aliases).map(([alias, command]) =>
-          `RUN echo 'alias ${alias}="${command.replace(/"/g, '\\"')}"' >> ~/.bashrc`
-        )
+        ...Object.entries(aliases).map(
+          ([alias, command]) =>
+            `RUN echo 'alias ${alias}="${command.replace(
+              /"/g,
+              '\\"'
+            )}"' >> ~/.bashrc`
+        ),
       ],
     ],
   }),
 });
-
 
 /**
  * Creates a component that sets environment variables in the container
@@ -352,9 +354,7 @@ export const withEnv = (env) => ({
     imageTransforms: [
       (setup) => [
         ...setup,
-        ...Object.entries(env).map(([key, value]) =>
-          `ENV ${key}=${value}`
-        )
+        ...Object.entries(env).map(([key, value]) => `ENV ${key}=${value}`),
       ],
     ],
   }),
@@ -373,40 +373,27 @@ export const withArt = () => ({
   },
 });
 
-
 /**
- * BROKEN and probably not the right thing to do
- * Creates a component that disables all network except for npm registry access.
- * Looks up the IP of the npm registry, allows only that IP in iptables,
- * and adds a static /etc/hosts entry for registry.npmjs.org.
- * @returns {BubbleComponent}
+ * Creates a component that loads extensions from ~/.bubbles.js and ./.bubbles.js
+ * @param {string} name - Name of the extension to load
+ * @returns {BubbleComponent[]}
  */
-export const withOfflineButNpm = () => ({
-  id: "withOfflineButNpm",
-  options: [],
-  handler: () => {
-    let npmRegistryIp = "104.16.30.34"; // default
-    // try {
-    //   const addresses = await dns.lookup("registry.npmjs.org", { all: true });
-    //   if (addresses.length > 0) {
-    //     npmRegistryIp = addresses[0].address;
-    //   }
-    // } catch (e) {
-    //   // fallback to default if lookup fails
-    // }
+export const requireExtensions = (name) => {
+  const require = createRequire(import.meta.url); // just because I've kept all of it sync and don't want to refactor
+  let config;
+  try {
+    config = require(join(process.cwd(), ".bubbles.js"));
+  } catch (e) {
+    try {
+      config = require(join(require("os").homedir(), ".bubbles.js"));
+    } catch (e) {}
+  }
+  if (config) {
+    const extensions = config.extensions || {};
 
-    return {
-      imageTransforms: [
-        (setup = []) => [
-          `RUN apt-get update && apt-get install -y iptables`,
-          `RUN iptables -A OUTPUT -d ${npmRegistryIp} -j ACCEPT`,
-          `RUN iptables -A OUTPUT -j DROP`,
-          `RUN echo "${npmRegistryIp} registry.npmjs.org" >> /etc/hosts`,
-          ...setup,
-        ],
-      ],
-    };
-  },
-});
-
-
+    if (extensions[name] && Array.isArray(extensions[name])) {
+      return extensions[name];
+    }
+  }
+  return [];
+};

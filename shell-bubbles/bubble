@@ -24,13 +24,13 @@ if [ "$1" = "--help" ]; then
     echo ""
     echo "Options:"
     echo "  --offline   Run container with network access disabled"
-    echo "  --rebuild [packages]    Rebuild the docker image with added packages"
+    echo "  --bbl-rebuild [packages]    bbl-rebuild the docker image with added packages"
     echo "  --help      Show this help message"
     exit 0
 fi
 
-if [ "$1" = "--rebuild" ]; then
-    # Remove the first argument (--rebuild)
+if [ "$1" = "--bbl-rebuild" ]; then
+    # Remove the first argument (--bbl-rebuild)
     shift
     update_image $@
     exit 0
