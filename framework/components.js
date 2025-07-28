@@ -385,7 +385,7 @@ export const requireExtensions = (name) => {
     config = require(join(process.cwd(), ".bubbles.js"));
   } catch (e) {
     try {
-      config = require(join(require("os").homedir(), ".bubbles.js"));
+      config = require(join(require("os").homedir(), ".bubbles", "config.js"));
     } catch (e) {}
   }
   if (config) {
