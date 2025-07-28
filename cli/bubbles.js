@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { spawnSync } from "child_process";
 import { existsSync } from "fs";
 import { writeFile, mkdir } from "fs/promises";
@@ -67,6 +68,8 @@ const commands = {
       } else {
         console.log("No bubble containers found");
       }
+    } else {
+      console.log("Empty output from docker ps.");
     }
 
     // Remove images
@@ -93,6 +96,8 @@ const commands = {
       } else {
         console.log("No bubble images found");
       }
+    } else {
+      console.log("Empty output from docker images.");
     }
   },
   async init() {
@@ -122,13 +127,13 @@ export default {
   "private": true
 }`;
       const defaultBubble = `export { bubble as default } from 'bubbles';`;
-      const exampleBubble = `import { bubble, without, withDefaults, withPackages } from 'bubbles';
+      const exampleBubble = `import { bubble, without, withDefaults, withPackages } from '@naugtur/bubbles';
 export default [
  ...without(bubble, ["withDefaults"]),
   withDefaults({
     name: "mybubble",
   }),
-  withPackages(['vim','ssh']
+  withPackages(['vim','ssh'])
 ]`;
 
       await writeFile(configPath, configTemplate);
@@ -148,7 +153,6 @@ export default [
           "Failed to link bubbles package. You may need to do it manually."
         );
       }
-
     } else {
       console.log("~/.bubbles directory already exists");
     }
@@ -158,12 +162,13 @@ export default [
     const aliases = config.aliases || [];
 
     if (aliases.length === 0) {
-      return;
+      console.log("No aliases in config", config);
     }
 
     // Set up aliases in current shell
     for (const alias of aliases) {
-      const result = spawnSync("alias", [`${alias}=bubbles cli ${alias}`], {
+      console.log(`alias ${alias}='bubbles cli ${alias}'`);
+      const result = spawnSync("alias", [`${alias}='bubbles cli ${alias}'`], {
         stdio: "inherit",
         shell: true,
       });

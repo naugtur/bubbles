@@ -11,13 +11,19 @@ async function run() {
   ).href;
   let bubbleChoice;
   try {
-    bubbleChoice = await import(location);
+    bubbleChoice = (await import(location)).default;
   } catch (e) {
     // allow for the default bubble to work without init
     if (name !== "here") {
       throw Error(`No bubble definition under '${location}`, { cause: e });
     }
-    blowBubble(bubble);
+    return blowBubble(bubble);
+  }
+  if (!bubbleChoice || !Array.isArray(bubbleChoice)) {
+    console.error(bubbleChoice);
+    throw Error(
+      `Failed to get a bubble from ${location} despite the file existing`
+    );
   }
   blowBubble(bubbleChoice);
 }

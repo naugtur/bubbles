@@ -7,7 +7,7 @@ import {
 } from "./index.js";
 
 export default (command) => [
-  ...without(bubble, ["withEntrypoint"]),
+  ...without(bubble, ["withEntrypoint", "withHelp"]),
   withDefaults({
     name: "cli",
   }),

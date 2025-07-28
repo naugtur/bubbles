@@ -168,10 +168,10 @@ export const withNpmPackagesOption = () => ({
 export const withPackages = (packages) => ({
   id: "withPackages",
   options: [],
-  handler: ({ values }) => ({
+  handler: () => ({
     imageTransforms: [
       (setup) => [
-        `RUN apt update && apt install -y ${values.packages.join(" ")}`,
+        `RUN apt update && apt install -y ${packages.join(" ")}`,
         ...setup,
       ],
     ],
@@ -280,7 +280,7 @@ export const withEntrypoint = (entrypoint) => ({
   id: "withEntrypoint",
   options: [],
   handler: () => ({
-    runArgsTransforms: [(args) => [...args, "--entrypoint", entrypoint]],
+    runArgsTransforms: [(args) => [...args, "--init", "--entrypoint", entrypoint]],
   }),
 });
 

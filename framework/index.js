@@ -47,7 +47,7 @@ const buildImage = (name, from, transformers = []) => {
   const dockerfile = composeDockerfile(from, transformers);
   const result = spawnSync("docker", ["build", "-t", name, "-"], {
     input: dockerfile,
-    // stdio: "pipe",
+    stdio: "pipe",
     encoding: "utf8",
   });
 
@@ -68,6 +68,9 @@ export const without = (handlers, ids) => {
  * @returns {void}
  */
 export const blowBubble = (handlers) => {
+  if(!handlers) {
+    throw Error('No components passed to blowBubble')
+  }
   handlers = handlers.flat(); // just in case we forget to ...
   /** @type {BubbleOption[]} */
   const allOptions = [
@@ -115,7 +118,7 @@ export const blowBubble = (handlers) => {
     ...positionals,
   ];
 
-  if (values.bblDryRun) {
+  if (values['bbl-dry-run']) {
     console.log(`Dry run mode enabled. Docker image will not be built or run.
 
 **Image name**
@@ -135,7 +138,7 @@ ${composeDockerfile(finalConfig.from, finalConfig.imageTransforms)}`);
     buildImage(imageName, finalConfig.from, allTransformers);
   };
 
-  if (values.bblRebuild) {
+  if (values['bbl-rebuild']) {
     updateImage();
   } else {
     // Check if image exists

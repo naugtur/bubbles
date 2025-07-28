@@ -51,7 +51,8 @@ export const readGlobalConfig = () => {
   }
 
   try {
-    return require(configPath);
+    const conf = require(configPath);
+    return conf.default || conf
   } catch (error) {
     throw Error("Failed to read config:", error.message);
   }
