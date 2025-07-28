@@ -3,7 +3,7 @@
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
 
 import { basename, join } from "node:path";
-import { createRequire } from "node:module";
+import { readGlobalConfig } from "./internal";
 
 /**
  * @param {string} [path="/mountpoint"] - Path to mount
@@ -374,19 +374,15 @@ export const withArt = () => ({
 });
 
 /**
- * Creates a component that loads extensions from ~/.bubbles.js and ./.bubbles.js
+ * Creates a component that loads extensions from ~/.bubbles.js
  * @param {string} name - Name of the extension to load
  * @returns {BubbleComponent[]}
  */
 export const requireExtensions = (name) => {
-  const require = createRequire(import.meta.url); // just because I've kept all of it sync and don't want to refactor
   let config;
   try {
-    config = require(join(process.cwd(), ".bubbles.js"));
+    config = readGlobalConfig()
   } catch (e) {
-    try {
-      config = require(join(require("os").homedir(), ".bubbles", "config.js"));
-    } catch (e) {}
   }
   if (config) {
     const extensions = config.extensions || {};

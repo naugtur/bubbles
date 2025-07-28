@@ -4,8 +4,6 @@
   "main": "framework/index.js",
   "type": "module",
   "scripts": {
-    "build": "node framework/generate-cli.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

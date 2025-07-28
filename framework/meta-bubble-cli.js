@@ -1,10 +1,10 @@
-import bubble from "../framework/bubble.js";
+import bubble from "./bubble.js";
 import {
   withDefaults,
   withEntrypoint,
   without,
   requireExtensions,
-} from "../framework/index.js";
+} from "./index.js";
 
 export default (command) => [
   ...without(bubble, ["withEntrypoint"]),

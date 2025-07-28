@@ -8,6 +8,8 @@ export { default as bubble } from "./bubble.js";
 /** @typedef {import("./components.js").BubbleConfig} BubbleConfig */
 /** @typedef {import("./components.js").BubbleOption} BubbleOption */
 
+
+
 /**
  * @param {BubbleConfig[]} configs
  */

@@ -1,29 +1,17 @@
 import { spawnSync } from "child_process";
-import { parseArgs } from "node:util";
-import { createInterface } from "readline";
 import { existsSync } from "fs";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { homedir } from "os";
+import { blowBubble } from "../framework/index.js";
+import {
+  globalConfigDir,
+  readGlobalConfig,
+  consumeHeadArg,
+  promptUser,
+} from "../framework/internal.js";
+import higherOrderBubble from "../framework/meta-bubble-cli.js";
 
-/**
- * Prompts user for confirmation
- * @param {string} message
- * @returns {Promise<boolean>}
- */
-const promptUser = (message) => {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
 
-  return new Promise((resolve) => {
-    rl.question(`${message} (y/N): `, (answer) => {
-      rl.close();
-      resolve(answer.toLowerCase() === "y" || answer.toLowerCase() === "yes");
-    });
-  });
-};
 
 /**
  * Execute Docker command with user confirmation
@@ -110,28 +98,45 @@ const commands = {
     }
   },
   async init() {
-    const globalConfigDir = join(homedir(), ".bubbles");
-    const configPath = join(globalConfigDir, "config.js");
+    const configPath = join(globalConfigDir, "bubbles.config.js");
     const packagePath = join(globalConfigDir, "package.json");
+    const defaultPath = join(globalConfigDir, "here.js");
+    const examplePath = join(globalConfigDir, "example.js");
 
     if (!existsSync(globalConfigDir)) {
       await mkdir(globalConfigDir, { recursive: true });
-      const configTemplate = `import { bubble } from 'bubbles';
-      
-module.exports = {
-  mybubble: [],
-  extensions: {},
-  // 
-  aliases: []
-}`;
+      const configTemplate = `
+/** @type {BubblesGlobalConfig} */
+export default const config = {
+  extensions: {
+    // extensions to all bubbles inheriting from bubble
+    // if you want a single custom bubble, create a file next to this instead. see: example.js
+    // root: [withPackages(['vim','ssh'])]
+    // user: 
+    // cli:
+  },
+  // clis to run in a bubble after 'bubbles alias'
+  aliases: ['npm','npx']
+};`;
       const packageTemplate = `{
   "name": "bubbles-config",
   "type": "module",
   "private": true
 }`;
+      const defaultBubble = `export { bubble as default } from 'bubbles';`;
+      const exampleBubble = `import { bubble, without, withDefaults, withPackages } from 'bubbles';
+export default const myBubble = [
+ ...without(bubble, ["withDefaults"]),
+  withDefaults({
+    name: "mybubble",
+  }),
+  withPackages(['vim','ssh']
+]`;
 
       await writeFile(configPath, configTemplate);
       await writeFile(packagePath, packageTemplate);
+      await writeFile(defaultPath, defaultBubble);
+      await writeFile(examplePath, exampleBubble);
 
       const linkResult = spawnSync("npm", ["link", "bubbles"], {
         cwd: globalConfigDir,
@@ -144,64 +149,44 @@ module.exports = {
       }
 
       console.log(`Created global config at ${globalConfigDir}`);
+
     } else {
       console.log("~/.bubbles directory already exists");
     }
   },
   async alias() {
-    const globalConfigDir = join(homedir(), ".bubbles");
-    const configPath = join(globalConfigDir, "config.js");
+    const config = await readGlobalConfig();
+    const aliases = config.aliases || [];
 
-    if (!existsSync(configPath)) {
-      console.error('Config file not found. Run "bubbles init" first.');
-      process.exit(1);
+    if (aliases.length === 0) {
+      return;
     }
 
-    try {
-      // Read current config
-      const configContent = await import(`file://${configPath}`);
-      const config = configContent.default || configContent;
-      const aliases = config.aliases || [];
-
-      if (aliases.length === 0) {
-        return;
-      }
-
-      // Set up aliases in current shell
-      for (const alias of aliases) {
-        const result = spawnSync(
-          "alias",
-          [`${alias.name}=bubbles bubble-alias ${alias.name}`],
-          {
-            stdio: "inherit",
-            shell: true,
-          }
-        );
-      }
-    } catch (error) {
-      console.error("Failed to set up aliases:", error.message);
-      process.exit(1);
+    // Set up aliases in current shell
+    for (const alias of aliases) {
+      const result = spawnSync(
+        "alias",
+        [`${alias}=bubbles cli ${alias}`],
+        {
+          stdio: "inherit",
+          shell: true,
+        }
+      );
     }
+  },
+  async cli() {
+    const name = consumeHeadArg();
+    blowBubble(higherOrderBubble(name));
+  },
+  async help() {
+    console.error("Usage: bubbles <command>");
+    console.error("Available commands:", Object.keys(commands).join(", "));
+    process.exit(1);
   },
 };
 
-const allOptions = [];
-const { values, positionals } = parseArgs({
-  options: Object.fromEntries(
-    allOptions.map(({ name, type, description }) => [
-      name,
-      { type, description },
-    ])
-  ),
-  allowPositionals: true,
-  strict: true,
-});
-
-const [command, ...args] = positionals;
+let command = consumeHeadArg();
 if (!command || !commands[command]) {
-  console.error("Usage: bubbles <command>");
-  console.error("Available commands:", Object.keys(commands).join(", "));
-  process.exit(1);
+  command = "help";
 }
-
-await commands[command](...args);
+await commands[command]();

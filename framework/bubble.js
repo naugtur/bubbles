@@ -27,7 +27,7 @@ export default [
   withOfflineOption(),
   ...requireExtensions("root"),
   withEntrypoint("bash"),
-  withMountpoint("/mountpoint", "node"),
+  withMountpoint("/here", "node"),
   withUser("node"),
   ...requireExtensions("user"),
 

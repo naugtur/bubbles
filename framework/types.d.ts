@@ -24,3 +24,23 @@ export interface BubbleComponent {
     options?: BubbleOption[]
   }) => BubbleConfig;
 }
+
+export interface BubblesGlobalConfig {
+  /**
+   * Extensions to all bubbles inheriting from bubble.
+   * If you want to customize a single bubble, create a file next to this instead.
+   */
+  extensions: {
+    /** Extensions for root bubble */
+    root?: BubbleComponent[];
+    /** Extensions for user bubble */
+    user?: BubbleComponent[];
+    /** Extensions for cli bubble */
+    cli?: BubbleComponent[];
+  };
+
+  /**
+   * CLI commands to run in a bubble after 'bubbles alias'
+   */
+  aliases: string[];
+}
