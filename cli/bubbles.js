@@ -105,7 +105,7 @@ const commands = {
       await mkdir(globalConfigDir, { recursive: true });
       const configTemplate = `
 /** @type {BubblesGlobalConfig} */
-export default const config = {
+export default {
   extensions: {
     // extensions to all bubbles inheriting from bubble
     // if you want a single custom bubble, create a file next to this instead. see: example.js
@@ -123,7 +123,7 @@ export default const config = {
 }`;
       const defaultBubble = `export { bubble as default } from 'bubbles';`;
       const exampleBubble = `import { bubble, without, withDefaults, withPackages } from 'bubbles';
-export default const myBubble = [
+export default [
  ...without(bubble, ["withDefaults"]),
   withDefaults({
     name: "mybubble",
@@ -138,7 +138,7 @@ export default const myBubble = [
       console.log(`Created global config at ${globalConfigDir}`);
       console.log(`Linking bubbles to ${globalConfigDir} as a dependency`);
 
-      const linkResult = spawnSync("npm", ["link", "bubbles"], {
+      const linkResult = spawnSync("npm", ["link", "@naugtur/bubbles"], {
         cwd: globalConfigDir,
         stdio: "inherit",
       });

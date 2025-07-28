@@ -1,10 +1,9 @@
 {
-  "name": "bubbles",
+  "name": "@naugtur/bubbles",
   "version": "1.0.0",
   "main": "framework/index.js",
   "type": "module",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/naugtur/bubbles.git"
@@ -15,27 +14,15 @@
   "bugs": {
     "url": "https://github.com/naugtur/bubbles/issues"
   },
+  "files": [
+    "cli",
+    "framework"
+  ],
   "homepage": "https://github.com/naugtur/bubbles#readme",
   "description": "",
   "bin": {
-    "bubble-bg": "./cli/bubble-bg.js",
     "bubble": "./cli/bubble.js",
-    "bubble-amp": "./cli/bubble-amp.js",
-    "bubble-burst": "./cli/bubble-burst.js",
-    "bubble-hardened": "./cli/bubble-hardened.js",
-    "bubble-npm": "./cli/bubble-npm.js",
-    "bubble-npm-hardened": "./cli/bubble-npm-hardened.js",
-    "safer-npm": "./cli/safer-npm.js",
-    "safer-npx": "./cli/safer-npx.js",
-    "safer-yarn": "./cli/safer-yarn.js",
-    "safer-pnpm": "./cli/safer-pnpm.js",
-    "safer-pnpx": "./cli/safer-pnpx.js",
-    "bubble-install-clis": "./cli/bubble-install-clis.js",
-    "npms": "./cli/npms.js",
-    "npxs": "./cli/npxs.js",
-    "yarns": "./cli/yarns.js",
-    "pnpms": "./cli/pnpms.js",
-    "pnpxs": "./cli/pnpxs.js"
+    "bubbles": "./cli/bubbles.js"
   },
   "devDependencies": {
     "@types/node": "^22.15.30"
