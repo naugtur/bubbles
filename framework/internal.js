@@ -47,14 +47,12 @@ export const readGlobalConfig = () => {
   const require = createRequire(import.meta.url); // just because I've kept all of it sync and don't want to refactor
 
   if (!existsSync(configPath)) {
-    console.error('Config file not found. Run "bubbles init" first.');
-    process.exit(1);
+    throw Error('Config file not found. Run "bubbles init" first.');
   }
 
   try {
     return require(configPath);
   } catch (error) {
-    console.error("Failed to read config:", error.message);
-    process.exit(1);
+    throw Error("Failed to read config:", error.message);
   }
 };

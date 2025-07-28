@@ -11,8 +11,6 @@ import {
 } from "../framework/internal.js";
 import higherOrderBubble from "../framework/meta-bubble-cli.js";
 
-
-
 /**
  * Execute Docker command with user confirmation
  * @param {string[]} args
@@ -137,6 +135,8 @@ export default const myBubble = [
       await writeFile(packagePath, packageTemplate);
       await writeFile(defaultPath, defaultBubble);
       await writeFile(examplePath, exampleBubble);
+      console.log(`Created global config at ${globalConfigDir}`);
+      console.log(`Linking bubbles to ${globalConfigDir} as a dependency`);
 
       const linkResult = spawnSync("npm", ["link", "bubbles"], {
         cwd: globalConfigDir,
@@ -144,11 +144,10 @@ export default const myBubble = [
       });
 
       if (linkResult.status !== 0) {
-        console.error("Failed to link bubbles package");
-        process.exit(1);
+        console.error(
+          "Failed to link bubbles package. You may need to do it manually."
+        );
       }
-
-      console.log(`Created global config at ${globalConfigDir}`);
 
     } else {
       console.log("~/.bubbles directory already exists");
@@ -164,14 +163,10 @@ export default const myBubble = [
 
     // Set up aliases in current shell
     for (const alias of aliases) {
-      const result = spawnSync(
-        "alias",
-        [`${alias}=bubbles cli ${alias}`],
-        {
-          stdio: "inherit",
-          shell: true,
-        }
-      );
+      const result = spawnSync("alias", [`${alias}=bubbles cli ${alias}`], {
+        stdio: "inherit",
+        shell: true,
+      });
     }
   },
   async cli() {
@@ -189,4 +184,5 @@ let command = consumeHeadArg();
 if (!command || !commands[command]) {
   command = "help";
 }
+
 await commands[command]();

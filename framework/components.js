@@ -3,7 +3,7 @@
 /** @typedef {import('./types').BubbleConfig} BubbleConfig */
 
 import { basename, join } from "node:path";
-import { readGlobalConfig } from "./internal";
+import { readGlobalConfig } from "./internal.js";
 
 /**
  * @param {string} [path="/mountpoint"] - Path to mount

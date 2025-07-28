@@ -5,7 +5,10 @@ import { consumeHeadArg, globalConfigDir } from "../framework/internal.js";
 
 async function run() {
   const name = consumeHeadArg();
-  const location = new URL(join(globalConfigDir, basename(name + ".js"))).href;
+  const location = new URL(
+    join(globalConfigDir, basename(name + ".js")),
+    "file:///"
+  ).href;
   let bubbleChoice;
   try {
     bubbleChoice = await import(location);
