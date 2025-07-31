@@ -1,6 +1,6 @@
-/** @typedef {import('./types').BubbleComponent} BubbleComponent */
-/** @typedef {import('./types').BubbleOption} BubbleOption */
-/** @typedef {import('./types').BubbleConfig} BubbleConfig */
+/** @typedef {import('./types').KipukaComponent} KipukaComponent */
+/** @typedef {import('./types').KipukaOption} KipukaOption */
+/** @typedef {import('./types').KipukaConfig} KipukaConfig */
 
 import { basename, join } from "node:path";
 import { readGlobalConfig } from "./internal.js";
@@ -8,7 +8,7 @@ import { readGlobalConfig } from "./internal.js";
 /**
  * @param {string} [path="/mountpoint"] - Path to mount
  * @param {string} [user="node"] - User to own the mountpoint
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withMountpoint = (path = "/mountpoint", user) => ({
   id: "withMountpoint",
@@ -32,7 +32,7 @@ export const withMountpoint = (path = "/mountpoint", user) => ({
 
 /**
  * Creates a component that adds offline mode option
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withOfflineOption = () => ({
   id: "withOfflineOption",
@@ -53,7 +53,7 @@ export const withOfflineOption = () => ({
 /**
  * Creates a component that provides default values
  * @param {Object} [defaults={}] - Default values
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withDefaults = (defaults = {}) => ({
   id: "withDefaults",
@@ -62,7 +62,7 @@ export const withDefaults = (defaults = {}) => ({
 });
 /**
  * Creates a component that adds help option
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withHelp = () => ({
   id: "withHelp",
@@ -86,7 +86,7 @@ Options:
 
 /**
  * Creates a component that enables interactive mode
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withInteractive = () => ({
   id: "withInteractive",
@@ -99,7 +99,7 @@ export const withInteractive = () => ({
 });
 /**
  * Creates a component that enables detached mode
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withDetached = () => ({
   id: "withDetached",
@@ -111,7 +111,7 @@ export const withDetached = () => ({
 
 /**
  * Creates a component that adds package installation option
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withPackagesOption = () => ({
   id: "withPackagesOption",
@@ -137,7 +137,7 @@ export const withPackagesOption = () => ({
 });
 /**
  * Creates a component that adds package installation option
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withNpmPackagesOption = () => ({
   id: "withNpmPackagesOption",
@@ -163,7 +163,7 @@ export const withNpmPackagesOption = () => ({
 /**
  * Creates a component that installs specified packages
  * @param {string[]} packages - Packages to install
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withPackages = (packages) => ({
   id: "withPackages",
@@ -180,7 +180,7 @@ export const withPackages = (packages) => ({
 /**
  * Creates a component that installs specified packages
  * @param {string[]} packages - Packages to install
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withNpmPackages = (packages) => ({
   id: "withNpmPackages",
@@ -195,7 +195,7 @@ export const withNpmPackages = (packages) => ({
 /**
  * Creates a component that adds RUN commands
  * @param {string[]} runs - Commands to run
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withRuns = (runs) => ({
   id: "withRuns",
@@ -209,7 +209,7 @@ export const withRuns = (runs) => ({
 /**
  * Creates a component that adds RUN commands
  * @param {string} cmd - Commands to run
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withCMD = (cmd) => ({
   id: "withCMD",
@@ -228,7 +228,7 @@ export const withCMD = (cmd) => ({
 /**
  * Creates a component that adds RUN commands
  * @param {string} user - Commands to run
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withUser = (user) => ({
   id: "withUser",
@@ -262,7 +262,7 @@ export const withUser = (user) => ({
 /**
  * Creates a component that exposes a specific port
  * @param {number} port - Port number to expose
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withPort = (port) => ({
   id: "withPort",
@@ -286,7 +286,7 @@ export const withEntrypoint = (entrypoint) => ({
 
 /**
  * Creates a component that adds a port exposure option
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withPortsOption = () => ({
   id: "withPortOption",
@@ -306,7 +306,7 @@ export const withPortsOption = () => ({
  * Creates a component that adds a file to the container
  * @param {string} path - Path where to create the file in container
  * @param {string} content - Content of the file
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withFile = (path, content) => ({
   id: "withFile",
@@ -321,7 +321,7 @@ export const withFile = (path, content) => ({
 /**
  * Creates a component that adds command aliases to the container
  * @param {Object.<string, string>} aliases - Object mapping alias names to commands
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withAliases = (aliases) => ({
   id: "withAliases",
@@ -345,7 +345,7 @@ export const withAliases = (aliases) => ({
 /**
  * Creates a component that sets environment variables in the container
  * @param {Object.<string, string>} env - Object mapping environment variable names to values
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withEnv = (env) => ({
   id: "withEnv",
@@ -361,22 +361,22 @@ export const withEnv = (env) => ({
 });
 
 /**
- * Creates a component that prints an ASCII art of a bubble
- * @returns {BubbleComponent}
+ * Creates a component that prints an ASCII art of a kipuka
+ * @returns {KipukaComponent}
  */
 export const withArt = () => ({
   id: "withArt",
   options: [],
   handler: () => {
-    console.log(` . ∘  ◯ ◦ (running in a bubble) ○◦ *  •`);
+    console.log(` . ∘  ◯ ◦ (running in a kipuka) ○◦ *  •`);
     return {};
   },
 });
 
 /**
- * Creates a component that loads extensions from ~/.bubbles.js
+ * Creates a component that loads extensions from ~/.kipuka/extensions.js
  * @param {string} name - Name of the extension to load
- * @returns {BubbleComponent[]}
+ * @returns {KipukaComponent[]}
  */
 export const requireExtensions = (name) => {
   let config;

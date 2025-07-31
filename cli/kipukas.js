@@ -3,14 +3,14 @@ import { spawnSync } from "child_process";
 import { existsSync } from "fs";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { blowBubble } from "../framework/index.js";
+import { blowKipuka } from "../framework/index.js";
 import {
   globalConfigDir,
   readGlobalConfig,
   consumeHeadArg,
   promptUser,
 } from "../framework/internal.js";
-import higherOrderBubble from "../framework/meta-bubble-cli.js";
+import higherOrderKipuka from "../framework/meta-kipuka-cli.js";
 
 /**
  * Execute Docker command with user confirmation
@@ -39,7 +39,7 @@ const commands = {
       "ps",
       "-a",
       "--filter",
-      "name=bubble-",
+      "name=kipuka-",
       "--format",
       "{{.Names}}",
     ]);
@@ -51,7 +51,7 @@ const commands = {
         .filter(Boolean);
       if (containers.length > 0) {
         console.log(
-          `Found ${containers.length} bubble containers: ${containers.join(
+          `Found ${containers.length} kipuka containers: ${containers.join(
             ", "
           )}`
         );
@@ -66,7 +66,7 @@ const commands = {
           );
         }
       } else {
-        console.log("No bubble containers found");
+        console.log("No kipuka containers found");
       }
     } else {
       console.log("Empty output from docker ps.");
@@ -76,7 +76,7 @@ const commands = {
     const imageList = spawnSync("docker", [
       "images",
       "--filter",
-      "reference=bubble-*",
+      "reference=kipuka-*",
       "--format",
       "{{.Repository}}",
     ]);
@@ -88,13 +88,13 @@ const commands = {
         .filter(Boolean);
       if (images.length > 0) {
         console.log(
-          `Found ${images.length} bubble images: ${images.join(", ")}`
+          `Found ${images.length} kipuka images: ${images.join(", ")}`
         );
         for (const image of images) {
           await executeDockerCommand(["rmi", image], `Remove image ${image}`);
         }
       } else {
-        console.log("No bubble images found");
+        console.log("No kipuka images found");
       }
     } else {
       console.log("Empty output from docker images.");
@@ -109,16 +109,16 @@ const commands = {
     if (!existsSync(globalConfigDir)) {
       await mkdir(globalConfigDir, { recursive: true });
       const configTemplate = `
-/** @type {BubblesGlobalConfig} */
+/** @type {KipukasGlobalConfig} */
 export default {
   extensions: {
-    // extensions to all bubbles inheriting from bubble
-    // if you want a single custom bubble, create a file next to this instead. see: example.js
+    // extensions to all kipukas inheriting from kipuka
+    // if you want a single custom kipuka, create a file next to this instead. see: example.js
     // root: [withPackages(['vim','ssh'])]
     // user: 
     // cli:
   },
-  // clis to run in a bubble after 'bubbles alias'
+  // clis to run in a kipuka after 'kipukas alias'
   aliases: ['npm','npx']
 };`;
       const packageTemplate = `{
@@ -126,12 +126,12 @@ export default {
   "type": "module",
   "private": true
 }`;
-      const defaultBubble = `export { bubble as default } from 'bubbles';`;
-      const exampleBubble = `import { bubble, without, withDefaults, withPackages } from '@naugtur/bubbles';
+      const defaultBubble = `export { kipuka as default } from '@naugtur/kipuka';`;
+      const exampleBubble = `import { kipuka, without, withDefaults, withPackages } from '@naugtur/kipuka';
 export default [
- ...without(bubble, ["withDefaults"]),
+ ...without(kipuka, ["withDefaults"]),
   withDefaults({
-    name: "mybubble",
+    name: "mykipuka",
   }),
   withPackages(['vim','ssh'])
 ]`;
@@ -141,9 +141,9 @@ export default [
       await writeFile(defaultPath, defaultBubble);
       await writeFile(examplePath, exampleBubble);
       console.log(`Created global config at ${globalConfigDir}`);
-      console.log(`Linking bubbles to ${globalConfigDir} as a dependency`);
+      console.log(`Linking kipuka to ${globalConfigDir} as a dependency`);
 
-      const linkResult = spawnSync("npm", ["link", "@naugtur/bubbles"], {
+      const linkResult = spawnSync("npm", ["link", "@naugtur/kipuka"], {
         cwd: globalConfigDir,
         stdio: "inherit",
       });
@@ -176,7 +176,7 @@ export default [
   },
   async cli() {
     const name = consumeHeadArg();
-    blowBubble(higherOrderBubble(name));
+    blowKipuka(higherOrderKipuka(name));
   },
   async help() {
     console.error("Usage: bubbles <command>");

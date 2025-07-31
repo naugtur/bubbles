@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { basename, join } from "path";
-import { blowBubble, bubble } from "../framework/index.js";
+import { blowKipuka, kipuka } from "../framework/index.js";
 import { consumeHeadArg, globalConfigDir } from "../framework/internal.js";
 
 async function run() {
@@ -17,14 +17,14 @@ async function run() {
     if (name !== "here") {
       throw Error(`No bubble definition under '${location}`, { cause: e });
     }
-    return blowBubble(bubble);
+    return blowKipuka(kipuka);
   }
   if (!bubbleChoice || !Array.isArray(bubbleChoice)) {
     console.error(bubbleChoice);
     throw Error(
-      `Failed to get a bubble from ${location} despite the file existing`
+      `Failed to get a kipuka from ${location} despite the file existing`
     );
   }
-  blowBubble(bubbleChoice);
+  blowKipuka(bubbleChoice);
 }
 run();

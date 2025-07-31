@@ -4,7 +4,7 @@ import { homedir } from "os";
 import { createRequire } from "node:module";
 import { createInterface } from "node:readline";
 
-/** @import {BubblesGlobalConfig} from './types' */
+/** @import {KipukasGlobalConfig} from './types' */
 
 /**
  * Prompts user for confirmation
@@ -36,18 +36,18 @@ export const consumeHeadArg = () => {
   return undefined;
 };
 
-export const globalConfigDir = join(homedir(), ".bubbles");
+export const globalConfigDir = join(homedir(), ".kipuka");
 
 /**
  * Read the global config file
- * @returns {BubblesGlobalConfig}
+ * @returns {KipukasGlobalConfig}
  */
 export const readGlobalConfig = () => {
   const configPath = join(globalConfigDir, "bubbles.config.js");
   const require = createRequire(import.meta.url); // just because I've kept all of it sync and don't want to refactor
 
   if (!existsSync(configPath)) {
-    throw Error('Config file not found. Run "bubbles init" first.');
+    throw Error('Config file not found. Run "kipukas init" first.');
   }
 
   try {

@@ -1,4 +1,4 @@
-import bubble from "./bubble.js";
+import kipuka from "./kipuka.js";
 import {
   withDefaults,
   withEntrypoint,
@@ -7,7 +7,7 @@ import {
 } from "./index.js";
 
 export default (command) => [
-  ...without(bubble, ["withEntrypoint", "withHelp"]),
+  ...without(kipuka, ["withEntrypoint", "withHelp"]),
   withDefaults({
     name: "cli",
   }),

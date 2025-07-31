@@ -1,12 +1,12 @@
 import { ParseArgsOptionsConfig, ParseArgsOptionsType } from 'node:util';
 
-export interface BubbleOption {
+export interface KipukaOption {
   name: keyof ParseArgsOptionsConfig;
   type: ParseArgsOptionsType;
   description?: string;
 }
 
-export interface BubbleConfig {
+export interface KipukaConfig {
   name?: string,
   from?: string,
   /** Dockerfile transformations */
@@ -15,28 +15,28 @@ export interface BubbleConfig {
   runArgsTransforms?: Array<(args: string[]) => string[]>;
 }
 
-export interface BubbleComponent {
+export interface KipukaComponent {
   id: string;
-  options: BubbleOption[];
+  options: KipukaOption[];
   handler: (params: {
     values: Record<string, any>;
     positionals?: string[];
-    options?: BubbleOption[]
-  }) => BubbleConfig;
+    options?: KipukaOption[]
+  }) => KipukaConfig;
 }
 
-export interface BubblesGlobalConfig {
+export interface KipukasGlobalConfig {
   /**
-   * Extensions to all bubbles inheriting from bubble.
-   * If you want to customize a single bubble, create a file next to this instead.
+   * Extensions to all kipukas inheriting from kipuka.
+   * If you want to customize a single kipuka, create a file next to this instead.
    */
   extensions: {
-    /** Extensions for root bubble */
-    root?: BubbleComponent[];
-    /** Extensions for user bubble */
-    user?: BubbleComponent[];
-    /** Extensions for cli bubble */
-    cli?: BubbleComponent[];
+    /** Extensions for root kipuka */
+    root?: KipukaComponent[];
+    /** Extensions for user kipuka */
+    user?: KipukaComponent[];
+    /** Extensions for cli kipuka */
+    cli?: KipukaComponent[];
   };
 
   /**

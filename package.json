@@ -1,28 +1,28 @@
 {
-  "name": "@naugtur/bubbles",
+  "name": "@naugtur/kipuka",
   "version": "1.0.0",
   "main": "framework/index.js",
   "type": "module",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/naugtur/bubbles.git"
+    "url": "git+https://github.com/naugtur/kipuka.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/naugtur/bubbles/issues"
+    "url": "https://github.com/naugtur/kipuka/issues"
   },
   "files": [
     "cli",
     "framework"
   ],
-  "homepage": "https://github.com/naugtur/bubbles#readme",
+  "homepage": "https://github.com/naugtur/kipuka#readme",
   "description": "",
   "bin": {
-    "bubble": "./cli/bubble.js",
-    "bubbles": "./cli/bubbles.js"
+    "kipuka": "./cli/kipuka.js",
+    "kipukas": "./cli/kipukas.js"
   },
   "devDependencies": {
     "@types/node": "^22.15.30"

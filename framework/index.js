@@ -3,22 +3,22 @@ import { parseArgs } from "node:util";
 
 export * from "./components.js";
 
-export { default as bubble } from "./bubble.js";
+export { default as kipuka } from "./kipuka.js";
 
-/** @typedef {import("./components.js").BubbleConfig} BubbleConfig */
-/** @typedef {import("./components.js").BubbleOption} BubbleOption */
+/** @typedef {import("./components.js").KipukaConfig} KipukaConfig */
+/** @typedef {import("./components.js").KipukaOption} KipukaOption */
 
 
 
 /**
- * @param {BubbleConfig[]} configs
+ * @param {KipukaConfig[]} configs
  */
-const mergeBubbleConfigs = (configs) =>
+const mergeKipukaConfigs = (configs) =>
   configs.reduce(
     /**
-     * @param {Required<BubbleConfig>} acc
-     * @param {BubbleConfig} conf
-     * @return {Required<BubbleConfig>}
+     * @param {Required<KipukaConfig>} acc
+     * @param {KipukaConfig} conf
+     * @return {Required<KipukaConfig>}
      */
     (acc, conf) => ({
       ...acc,
@@ -64,15 +64,15 @@ export const without = (handlers, ids) => {
 
 /**
  * Creates and runs a containerized environment based on provided components
- * @param {import('./types').BubbleComponent[]} handlers - Array of bubble components
+ * @param {import('./types').KipukaComponent[]} handlers - Array of kipuka components
  * @returns {void}
  */
-export const blowBubble = (handlers) => {
+export const blowKipuka = (handlers) => {
   if(!handlers) {
-    throw Error('No components passed to blowBubble')
+    throw Error('No components passed to blowKipuka')
   }
   handlers = handlers.flat(); // just in case we forget to ...
-  /** @type {BubbleOption[]} */
+  /** @type {KipukaOption[]} */
   const allOptions = [
     {
       name: "bbl-rebuild",
@@ -102,9 +102,9 @@ export const blowBubble = (handlers) => {
     .map((handler) =>
       handler.handler({ values, positionals, options: allOptions })
     )
-  const finalConfig = mergeBubbleConfigs(results);
+  const finalConfig = mergeKipukaConfigs(results);
 
-  const name = `bubble-${finalConfig.name || "sandbox"}`;
+  const name = `kipuka-${finalConfig.name || "sandbox"}`;
   const imageName = `${name}-image`;
 
   const baseDockerArgs = ["--rm", "--name", name];
