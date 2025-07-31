@@ -43,7 +43,7 @@ export const globalConfigDir = join(homedir(), ".kipuka");
  * @returns {KipukasGlobalConfig}
  */
 export const readGlobalConfig = () => {
-  const configPath = join(globalConfigDir, "bubbles.config.js");
+  const configPath = join(globalConfigDir, "kipuka.config.js");
   const require = createRequire(import.meta.url); // just because I've kept all of it sync and don't want to refactor
 
   if (!existsSync(configPath)) {

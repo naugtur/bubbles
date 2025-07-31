@@ -274,7 +274,7 @@ export const withPort = (port) => ({
 /**
  * selects an entrypoint
  * @param {string} entrypoint - Port number to expose
- * @returns {BubbleComponent}
+ * @returns {KipukaComponent}
  */
 export const withEntrypoint = (entrypoint) => ({
   id: "withEntrypoint",

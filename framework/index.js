@@ -67,20 +67,20 @@ export const without = (handlers, ids) => {
  * @param {import('./types').KipukaComponent[]} handlers - Array of kipuka components
  * @returns {void}
  */
-export const blowKipuka = (handlers) => {
+export const start = (handlers) => {
   if(!handlers) {
-    throw Error('No components passed to blowKipuka')
+    throw Error('No components passed to start')
   }
   handlers = handlers.flat(); // just in case we forget to ...
   /** @type {KipukaOption[]} */
   const allOptions = [
     {
-      name: "bbl-rebuild",
+      name: "kipuka-rebuild",
       type: "boolean",
       description: "Rebuild the Docker image even if already exists",
     },
     {
-      name: "bbl-dry-run",
+      name: "kipuka-dry-run",
       type: "boolean",
       description: "prints resulting configs, does nothing",
     },
@@ -97,7 +97,7 @@ export const blowKipuka = (handlers) => {
     strict: false,
   });
 
-  /** @type {BubbleConfig[]} */
+  /** @type {KipukaConfig[]} */
   const results = handlers
     .map((handler) =>
       handler.handler({ values, positionals, options: allOptions })
@@ -118,7 +118,7 @@ export const blowKipuka = (handlers) => {
     ...positionals,
   ];
 
-  if (values['bbl-dry-run']) {
+  if (values['kipuka-dry-run']) {
     console.log(`Dry run mode enabled. Docker image will not be built or run.
 
 **Image name**
@@ -138,7 +138,7 @@ ${composeDockerfile(finalConfig.from, finalConfig.imageTransforms)}`);
     buildImage(imageName, finalConfig.from, allTransformers);
   };
 
-  if (values['bbl-rebuild']) {
+  if (values['kipuka-rebuild']) {
     updateImage();
   } else {
     // Check if image exists
