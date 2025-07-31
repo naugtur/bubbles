@@ -138,14 +138,14 @@ export default {
     // cli:
   },
   // clis to run in a kipuka after 'kipuka alias'
-  aliases: ['npm','npx']
+  aliases: ['npm','npx','pnpm','pnpx','yarn','yarnpkg']
 };`;
       const packageTemplate = `{
   "name": "kipuka-config",
   "type": "module",
   "private": true
 }`;
-      const exampleKipuka = `import { kipuka, without, withDefaults, withPackages } from '@lavamoat/kipuka';
+      const exampleKipuka = `import { kipuka, without, withDefaults, withPackages } from '@naugtur/kipuka';
 export default [
  ...without(kipuka, ["withDefaults"]),
   withDefaults({
@@ -159,10 +159,10 @@ export default [
       await writeFile(examplePath, exampleKipuka);
       console.log(`Created global config at ${globalConfigDir}`);
       console.log(
-        `Linking @lavamoat/kipuka to ${globalConfigDir} as a dependency`
+        `Linking @naugtur/kipuka to ${globalConfigDir} as a dependency`
       );
 
-      const linkResult = spawnSync("npm", ["link", "@lavamoat/kipuka"], {
+      const linkResult = spawnSync("npm", ["link", "@naugtur/kipuka"], {
         cwd: globalConfigDir,
         stdio: "inherit",
       });
@@ -214,10 +214,8 @@ export default [
 };
 
 let command = consumeHeadArg();
-if (!command) {
+if (!command || command == "--") {
   runKipuka();
-} else if (!commands[command]) {
-  command = "help";
+} else {
+  await commands[command || "help"]();
 }
-
-await commands[command]();

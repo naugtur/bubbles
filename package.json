@@ -1,6 +1,6 @@
 {
   "name": "@naugtur/kipuka",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "framework/index.js",
   "type": "module",
   "scripts": {},
@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/naugtur/kipuka/issues"
   },

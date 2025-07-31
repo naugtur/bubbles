@@ -75,7 +75,9 @@ export const withHelp = () => ({
   ],
   handler: ({ values, options = [] }) => {
     if (values.help) {
-      console.log(`Usage: ${basename(process.argv[1])} [OPTIONS]
+      console.log(`Usage:
+kipuka -- [OPTIONS]
+kipuka run [NAME] -- [OPTIONS]
 Options:
   ${options.map((opt) => `--${opt.name}\t ${opt.description}`).join("\n  ")}`);
       process.exit(0);
