@@ -49,6 +49,11 @@ With custom options
 kipuka -- --help
 ```
 
+### Clean up when you have too many
+
+Run `kipuka cleanup` and it'll help you clean things up one by one.
+
+
 
 ## Commands
 
