@@ -1,17 +1,19 @@
-import kipuka from "./kipuka.js";
-import {
-  withDefaults,
-  withEntrypoint,
-  without,
-  requireExtensions,
-} from "./index.js";
 
-export default (command) => [
+import {
+  kipuka,
+  withDefaults,
+  without,
+  withCliWrapEntrypoint,
+  requireExtensions,
+  withHelp,
+} from "../framework/index.js";
+
+export default [
   ...without(kipuka, ["withEntrypoint", "withHelp"]),
   withDefaults({
     name: "cli",
   }),
+  withHelp('k-help'),
   ...requireExtensions("cli"),
-  ...requireExtensions("cli_" + command),
-  withEntrypoint(command),
+  withCliWrapEntrypoint()
 ];

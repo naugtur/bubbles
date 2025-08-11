@@ -7,7 +7,7 @@ Easy, composable and transparent way to run things in a docker container.
 
 
 
-## Transparently protect all your installs ans scripts
+## Transparently protect all your installs and scripts
 
 Want to keep using the tools you're used to but get additional security?
 
@@ -18,10 +18,10 @@ Want to keep using the tools you're used to but get additional security?
 npm install -g @naugtur/kipuka
 
 # Initialize configuration
-kipuka init
+kipuka-ctl init
 
 # Set up shell aliases for package managers
-kipuka alias
+kipuka-ctl alias
 ## or put `kipuka alias` at the end of your .bashrc
 ```
 
@@ -49,9 +49,14 @@ With custom options
 kipuka -- --help
 ```
 
+Run your own composition from `~/.kipuka/my.js`
+```
+kipuka my --help
+```
+
 ### Clean up when you have too many
 
-Run `kipuka cleanup` and it'll help you clean things up one by one.
+Run `kipuka-ctl cleanup` and it'll help you clean things up one by one.
 
 
 
@@ -60,30 +65,26 @@ Run `kipuka cleanup` and it'll help you clean things up one by one.
 ### `kipuka --`
 Run the default kipuka environment.
 
-### `kipuka run <name>`
+### `kipuka <name>`
 Run a custom kipuka defined in `~/.kipuka/<name>.js`.
 
 ### `kipuka cli <command>`
 Run a CLI command in an isolated container. This is what gets aliased when you run `kipuka alias`.
 
-### `kipuka init`
+### `kipuka-ctl init`
 Initialize kipuka configuration directory at `~/.kipuka/` with:
 - `kipuka.config.js` - Global configuration
 - `example.js` - Example custom kipuka
 - `package.json` - Node.js module configuration
+- and more batterries-included useful compositions
 
-### `kipuka alias`
-Output shell aliases for package managers. Run with `eval "$(kipuka alias)"` to activate:
-- `npm` → `kipuka cli npm`
-- `yarn` → `kipuka cli yarn`  
-- `pnpm` → `kipuka cli pnpm`
-- etc.
+### `kipuka-ctl alias`
+Output and run shell aliases for package managers. 
 
-### `kipuka cleanup`
+You can put `kipuka-ctl alias` at the end of your .bashrc or copy its output for an immutable version.
+
+### `kipuka-cli cleanup`
 Interactively stop and remove selected kipuka containers and images. Keeps your Docker environment tidy.
-
-### `kipuka help`
-Show usage information.
 
 ## Configuration
 
@@ -96,7 +97,6 @@ export default {
     // Extensions for all kipukas
     root: [withPackages(['vim', 'curl'])],
     user: [withEnv({ EDITOR: 'vim' })],
-    cli: []
   },
   // Commands to alias to kipuka
   aliases: ['npm', 'npx', 'pnpm', 'pnpx', 'yarn', 'yarnpkg']
@@ -115,11 +115,13 @@ import { kipuka, without, withDefaults, withPackages } from '@naugtur/kipuka';
 
 export default [
   ...without(kipuka, ["withDefaults"]),
-  withDefaults({ name: "my-secure-env" }),
+  withDefaults({ name: "my-secure-env", from: "node:lts" }),
   withPackages(['git', 'vim', 'curl']),
   withEnv({ NODE_ENV: 'development' })
 ];
 ```
+
+Run it with `kipuka <name>`
 
 ### Available Components
 

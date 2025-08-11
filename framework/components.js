@@ -62,13 +62,14 @@ export const withDefaults = (defaults = {}) => ({
 });
 /**
  * Creates a component that adds help option
+ * @param {string} key - the name of the flag to use for help print
  * @returns {KipukaComponent}
  */
-export const withHelp = () => ({
+export const withHelp = (key) => ({
   id: "withHelp",
   options: [
     {
-      name: "help",
+      name: key || "help",
       type: "boolean",
       description: "Show help information",
     },
@@ -273,6 +274,25 @@ export const withPort = (port) => ({
     runArgsTransforms: [(args) => [...args, "-p", `${port}:${port}`]],
   }),
 });
+
+/**
+ * selects an entrypoint from a flag
+ * @returns {KipukaComponent}
+*/
+export const withCliWrapEntrypoint = () => ({
+  id: "withCliWrapEntrypoint",
+  options: [
+    {
+      name: "k-wrap-cli",
+      type: "string",
+      description: "cli command to run as entrypoint",
+    },
+  ],
+  handler: ({ values }) => ({
+    runArgsTransforms: [(args) => [...args, "--init", "--entrypoint", values['k-wrap-cli']]],
+  }),
+});
+
 /**
  * selects an entrypoint
  * @param {string} entrypoint - Port number to expose
